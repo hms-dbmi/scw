@@ -95,7 +95,7 @@ You should see a lot of sequences that look like this:
 
     $ AATTCGTGGAGAAAGAAATGGCTCGTCTGGCAGCATTTGATATGGG
 If we BLAST this sequence to the mouse genome, we come up empty, so it is some kind of contaminant sequence, it isn't clear where it comes from. The protocol listed here doesn't have too many clues either. If we could figure out what these sequences are, it would help troubleshoot the preparation protocol and we might be able to align more reads. As it is, these sequences are unlikely to align to the mouse genome, so they mostly represent wasted sequencing.
-
+***
 > ##### FastQC reports and the implications for data quality (more information)
 > [This blog post](http://bioinfo-core.org/index.php/9th_Discussion-28_October_2010) has very good information on what bad plots look like and what they mean for your data.
 >
@@ -103,7 +103,7 @@ If we BLAST this sequence to the mouse genome, we come up empty, so it is some k
 >
 > Please read [this note on evaluating fastqc results](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/Help/2%20Basic%20Operations/2.2%20Evaluating%20Results.html), before being too alarmed by the red "X"s or the orange "!"s in the FastQC report.
 
-
+***
 
 #Alignment
 
