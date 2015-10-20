@@ -19,8 +19,8 @@ The raw data we will be using for this part of the workshop lives here `/groups/
     L139_ESC_1.subset.fastq  L139_ESC_2.subset.fastq  L139_MEF_49.subset.fastq  L139_MEF_50.subset.fastq
 
 =====
-
 > [FASTQ](https://en.wikipedia.org/wiki/FASTQ_format) files are the standard format for sequenced reads, and that is the format you will receive from the sequencing center after they sequence your cDNA libraries.
+
 =====
 
 The 4 FASTQ files that we will be working with for this module contain 1000 reads each from ~100 samples. The samples are from a [single-cell RNA-seq experiment](http://genome.cshlp.org/content/21/7/1160.long) where researchers were looking at differences between expression in mouse embryonic fibroblasts (MEF) and embryonic stem (ES) cells from mice. 
@@ -35,6 +35,7 @@ The 4 FASTQ files that we will be working with for this module contain 1000 read
 > This is outside the scope of this workshop, but it is important to note that this will add an additional step prior to the three steps listed below.
 
 =====
+
 We'll be taking this small subset of reads and performing the following steps:
 
 1. looking at them to make sure they are of good quality 
