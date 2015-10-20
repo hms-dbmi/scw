@@ -15,8 +15,6 @@ Do that and you're ready to roll. You should see that you are now connected to a
 The raw data we will be using for this part of the workshop lives here `/groups/pklab/scw2014/ES.MEF/subset`:
 
     $ ls /groups/pklab/scw2014/ES.MEF/subset
-    
-    L139_ESC_1.subset.fastq  L139_ESC_2.subset.fastq  L139_MEF_49.subset.fastq  L139_MEF_50.subset.fastq
 
 ***
 > [FASTQ](https://en.wikipedia.org/wiki/FASTQ_format) files are the standard format for sequenced reads, and that is the format you will receive from the sequencing center after they sequence your cDNA libraries.
@@ -26,14 +24,16 @@ The raw data we will be using for this part of the workshop lives here `/groups/
 The 4 FASTQ files that we will be working with for this module contain 1000 reads each from ~100 samples. The samples are from a [single-cell RNA-seq experiment](http://genome.cshlp.org/content/21/7/1160.long) where researchers were looking at differences between expression in mouse embryonic fibroblasts (MEF) and embryonic stem (ES) cells from mice. 
 
 ***
-> ##### Note on mutiplexing and demultiplexing
->
-> Libraries prepared from hundreds of single cells can be sequenced in the same lane (multiplexed). During the preparation of these libraries each cell is given a distinct "barcode", a short nucleotide sequence that will enable us to separate them out after sequencing. Illumina provides adaptors with a barcodes, and software that can demultiplex the data for you. So, if you use these Illumina barcodes, the sequencing center will return demultiplexed fastq files to you. 
->
-> However, Illumina offers only ~96 distinct barcode combinations (as of March 2015), and for single cell work we need hundreds of them. To get around this, many groups design their own sets of barcodes (also called UMIs for Unique Molecular Identifiers). Since Illumina's software is unable to handle these, you will have to perform demultiplexing after receiving the data from the sequencing center. 
-> 
-> This is outside the scope of this workshop, but it is important to note that this will add an additional step prior to the three steps listed below.
+***
+**Note on mutiplexing and demultiplexing**
 
+Libraries prepared from hundreds of single cells can be sequenced in the same lane (multiplexed). During the preparation of these libraries each cell is given a distinct "barcode", a short nucleotide sequence that will enable us to separate them out after sequencing. Illumina provides adaptors with a barcodes, and software that can demultiplex the data for you. So, if you use these Illumina barcodes, the sequencing center will return demultiplexed fastq files to you. 
+
+However, Illumina offers only ~96 distinct barcode combinations (as of March 2015), and for single cell work we need hundreds of them. To get around this, many groups design their own sets of barcodes (also called UMIs for Unique Molecular Identifiers). Since Illumina's software is unable to handle these, you will have to perform demultiplexing after receiving the data from the sequencing center. 
+
+This is outside the scope of this workshop, but it is important to note that this will add an additional step prior to the three steps listed below.
+
+***
 ***
 
 We'll be taking this small subset of reads and performing the following steps:
@@ -99,11 +99,14 @@ You should see a lot of sequences that look like this:
 If we BLAST this sequence to the mouse genome, we come up empty, so it is some kind of contaminant sequence, it isn't clear where it comes from. The protocol listed here doesn't have too many clues either. If we could figure out what these sequences are, it would help troubleshoot the preparation protocol and we might be able to align more reads. As it is, these sequences are unlikely to align to the mouse genome, so they mostly represent wasted sequencing.
 
 ***
-> ##### FastQC reports and the implications for data quality (more information)
-> * [This blog post](http://bioinfo-core.org/index.php/9th_Discussion-28_October_2010) has very good information on what bad plots look like and what they mean for your data.
-> * [This page](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/good_sequence_short_fastqc.html) has an example report from a good dataset.
-> * Please read [this note on evaluating fastqc results](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/Help/2%20Basic%20Operations/2.2%20Evaluating%20Results.html), before being too alarmed by the red "X"s or the orange "!"s in the FastQC report.
+***
+**FastQC reports and the implications for data quality (more information)**
 
+* [This blog post](http://bioinfo-core.org/index.php/9th_Discussion-28_October_2010) has very good information on what bad plots look like and what they mean for your data.
+* [This page](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/good_sequence_short_fastqc.html) has an example report from a good dataset.
+* Please read [this note on evaluating fastqc results](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/Help/2%20Basic%20Operations/2.2%20Evaluating%20Results.html), before being too alarmed by the red "X"s or the orange "!"s in the FastQC report.
+
+***
 ***
 
 #Alignment
