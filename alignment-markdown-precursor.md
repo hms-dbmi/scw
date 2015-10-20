@@ -154,7 +154,10 @@ Each of these should complete in about seven to ten minutes. Since we ran them a
 
 `-W 00:20` tells the scheduler the job should take about 20 minutes. 
 
-`-q short` submits the job to the short queue. 
+`-q short` submits the job to the short queue.
+
+The syntax of the tophat command is 
+`tophat -p <NUMBER OF THREADS> --no-coverage-search --transcriptome-index=<PATH TO TRASNCRIPTOME INDEX> <PATH TO GENOME INDEX> <PATH TO INPUT FASTQ>`
 
 At the end we tack on (after the ";") a command to rename (`mv`) the Tophat output filename `accepted_hits.bam` to something more evocative.
 ***
@@ -188,10 +191,12 @@ We need to massage the format of this file so we can use it. We'll take the firs
     $ sed 1d combined.featureCounts | cut -f1,7- | sed s/Geneid/id/ > combined.counts
 
 This command means *s*team *ed*it (`sed`) the file `combined.featureCounts` by 
+***
+`1d` deleting the first line
 
-1. `1d` deleting the first line
-* `-f1,7-` keeping the first column and everything from the 7th column on 
-* `s/Geneid/id/` changing the phrase "Geneid" to "id". 
+`-f1,7-` keeping the first column and everything from the 7th column on 
 
+`s/Geneid/id/` changing the phrase "Geneid" to "id". 
+***
 This outputs a file in a format with "I" rows of genes and the "J" columns of samples. Each cell is the number of reads that can be uniquely assigned to the gene "i" in the sample "j". This file is of now ready and in the correct format for loading into R.
 
