@@ -1,6 +1,6 @@
 # Single Cell Workshop 2015
 
-Materials for the Analysis of heterogeneity and subpopulations session of the HSCI/Catalyst single cell RNA-Seq workshop, Nov 2015
+Materials for the [Analysis of heterogeneity and subpopulations session of the HSCI/Catalyst single cell RNA-Seq workshop, Nov 2015](http://hsci.harvard.edu/event/single-cell-genomics-workshops)
 
 ---
 
