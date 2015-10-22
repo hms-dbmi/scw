@@ -29,7 +29,7 @@ The 4 FASTQ files that we will be working with for this module contain 1000 read
 
 Libraries prepared from hundreds of single cells can be sequenced in the same lane (multiplexed). During the preparation of these libraries each cell is given a distinct "barcode", a short nucleotide sequence that will enable us to separate them out after sequencing. Illumina provides adaptors with a barcodes, and software that can demultiplex the data for you. So, if you use these Illumina barcodes, the sequencing center will return demultiplexed fastq files to you. 
 
-However, Illumina offers only ~96 distinct barcode combinations (as of March 2015), and for single cell work we need hundreds of them. To get around this, many groups design their own sets of barcodes (also called UMIs for Unique Molecular Identifiers). Since Illumina's software is unable to handle these, you will have to perform demultiplexing after receiving the data from the sequencing center. 
+However, Illumina offers only ~96 distinct barcode combinations (as of March 2015). For single cell work where we are interested in simultaneously sequencing more than 96 cells such as with many of the more recent droplet-based microfluidics approaches, we need additional barcodes. To this end, many groups design their own sets of barcodes; since Illumina's software is unable to use these to separate the samples, you will have to perform demultiplexing after receiving the data from the sequencing center. 
 
 This is outside the scope of this workshop, but it is important to note that this will add an additional step prior to the three steps listed below.
 
