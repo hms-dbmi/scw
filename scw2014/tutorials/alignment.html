@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+<title>Setting up Orchestra</title>
+
+<script type="text/javascript">
+window.onload = function() {
+  var imgs = document.getElementsByTagName('img'), i, img;
+  for (i = 0; i < imgs.length; i++) {
+    img = imgs[i];
+    // center an image if it is the only element of its parent
+    if (img.parentElement.childElementCount === 1)
+      img.parentElement.style.textAlign = 'center';
+  }
+};
+</script>
+
+
+
+
+
+<style type="text/css">
+body, td {
+   font-family: sans-serif;
+   background-color: white;
+   font-size: 13px;
+}
+
+body {
+  max-width: 800px;
+  margin: auto;
+  padding: 1em;
+  line-height: 20px;
+}
+
+tt, code, pre {
+   font-family: 'DejaVu Sans Mono', 'Droid Sans Mono', 'Lucida Console', Consolas, Monaco, monospace;
+}
+
+h1 {
+   font-size:2.2em;
+}
+
+h2 {
+   font-size:1.8em;
+}
+
+h3 {
+   font-size:1.4em;
+}
+
+h4 {
+   font-size:1.0em;
+}
+
+h5 {
+   font-size:0.9em;
+}
+
+h6 {
+   font-size:0.8em;
+}
+
+a:visited {
+   color: rgb(50%, 0%, 50%);
+}
+
+pre, img {
+  max-width: 100%;
+}
+pre {
+  overflow-x: auto;
+}
+pre code {
+   display: block; padding: 0.5em;
+}
+
+code {
+  font-size: 92%;
+  border: 1px solid #ccc;
+}
+
+code[class] {
+  background-color: #F8F8F8;
+}
+
+table, td, th {
+  border: none;
+}
+
+blockquote {
+   color:#666666;
+   margin:0;
+   padding-left: 1em;
+   border-left: 0.5em #EEE solid;
+}
+
+hr {
+   height: 0px;
+   border-bottom: none;
+   border-top-width: thin;
+   border-top-style: dotted;
+   border-top-color: #999999;
+}
+
+@media print {
+   * {
+      background: transparent !important;
+      color: black !important;
+      filter:none !important;
+      -ms-filter: none !important;
+   }
+
+   body {
+      font-size:12pt;
+      max-width:100%;
+   }
+
+   a, a:visited {
+      text-decoration: underline;
+   }
+
+   hr {
+      visibility: hidden;
+      page-break-before: always;
+   }
+
+   pre, blockquote {
+      padding-right: 1em;
+      page-break-inside: avoid;
+   }
+
+   tr, img {
+      page-break-inside: avoid;
+   }
+
+   img {
+      max-width: 100% !important;
+   }
+
+   @page :left {
+      margin: 15mm 20mm 15mm 10mm;
+   }
+
+   @page :right {
+      margin: 15mm 10mm 15mm 20mm;
+   }
+
+   p, h2, h3 {
+      orphans: 3; widows: 3;
+   }
+
+   h2, h3 {
+      page-break-after: avoid;
+   }
+}
+</style>
+
+
+
+</head>
+
+<body>
+<h1>Setting up Orchestra</h1>
+
+<p>To get on Orchestra you want to connect via ssh, and to turn X11 forwarding on. Turning
+X11 forwarding will let the Orchestra machines open windows on your local machine, which
+is useful for looking at the data.</p>
+
+<p>Connect to Orchestra using X11 forwarding:</p>
+
+<pre><code class="bash">    ssh -X your_user_name@orchestra.med.harvard.edu
+</code></pre>
+
+<p>Orchestra is set up with separate login nodes and compute nodes. You don&#39;t want to be
+doing any work on the login node, as that is set aside for doing non computationally
+intensive tasks and running code on there will make Orchestra slow for everybody.
+Here is how to connect to a compute node in interactive mode, meaning you can
+type commands:</p>
+
+<pre><code class="bash">    bsub -q interactive bash
+</code></pre>
+
+<p>Do that and you&#39;re ready to roll. You should see that you are now connected to a node
+named by an instrument like <code>clarinet</code>.</p>
+
+<h1>Introduction to the data</h1>
+
+<p>The raw data we will be using for this part of the workshop lives here:</p>
+
+<pre><code class="bash">    /groups/pklab/scw2014/ES.MEF/subset
+</code></pre>
+
+<p>Those files are a 1000 reads from ~ 100 samples from a single-cell
+RNA-seq experiment looking at mouse embryonic fibroblasts (MEF) and
+embryonic stem (ES) cells. These are files you might get from your
+sequencing core after you send them off for sequencing. We&#39;ll be
+taking a subset of those files, looking at them to make sure they are
+of good quality, aligning them to the mouse genome and producing a table
+of number of reads aligning to each gene for each sample. The counts table
+will be the starting point for the more interesting downstream analyses.</p>
+
+<p>We will be using programs that are installed here:</p>
+
+<pre><code class="bash">    /opt/bcbio/local/bin/
+</code></pre>
+
+<p>The output of typing <code>which fastqc</code> at your prompt should be
+<code>/opt/bcbio/local/bin/fastqc</code>. If it isn&#39;t flag someone down and
+we will fix it.</p>
+
+<p>We&#39;re going to do this like a cooking show, we&#39;ll use those ES.MEF
+files as a small example just to make sure everything is working, then
+we&#39;ll look at pre-computed results on a full set of samples.</p>
+
+<h1>Setup</h1>
+
+<p>The first thing we will do is copy the small test data over into your own directory.</p>
+
+<pre><code class="bash">    mkdir ~/workshop
+    cd ~/workshop
+    cp -r /groups/pklab/scw2014/ES.MEF/subset .
+</code></pre>
+
+<p>These commands mean:</p>
+
+<ol>
+<li>make a directory (mkdir) named workshop</li>
+<li>change into the directory (cd) named workshop</li>
+<li>copy (cp) the folder  /groups/pklab/scw2014/ES.MEF/subset and everything underneath it to the current directory</li>
+</ol>
+
+<h1>Quality control</h1>
+
+<p>With the start of any data analysis it is important to poke around at
+your data to see where the warts are. We are expecting single-cell
+datasets to be extra messy; we should be expecting failures in
+preparing the libraries, failures in adequately capturing the
+transcriptome of the cell, libraries that sequence the same reads
+repeatedly and other issues. In particular we expect the libraries to
+not be very complex; these are just tags of the end of a transcript
+and so for each transcript there are a limited number of positions
+where a read can be placed. We&#39;ll see how this feature skews some of the
+more commonly used quality metrics now.</p>
+
+<p>For RNA-seq data many common issues can be detected right off the bat
+just by looking at some features of the raw reads. The most commonly
+used program to look at the raw reads is
+<a href="http://www.bioinformatics.babraham.ac.uk/projects/fastqc/">FastQC</a>.
+FastQC is pretty fast, especially on small files, so we can run FastQC
+on one of the entire files. First lets copy one of those files over:</p>
+
+<pre><code class="bash">    mkdir ~/workshop/fastq
+    cp /groups/pklab/scw2014/ES.MEF/fastq/L139_ESC_1.fq ~/workshop/fastq/
+    cd ~/workshop/fastq
+</code></pre>
+
+<p>Now we can run FastQC on the file by typing:</p>
+
+<pre><code class="bash">    fastqc L139_ESC_1.fq
+</code></pre>
+
+<p>And look at the nice HTML report it generates with Firefox:</p>
+
+<pre><code class="bash">    firefox L139_ESC_1_fastqc.html
+</code></pre>
+
+<p>This library looks pretty rough. The per base sequence quality plot shows some major
+quality problems during sequencing; having degrading quality as you sequence further
+is normal, but this is severe drop off. Severe quality drop off like this is generally due
+to a technical issue with the sequencer, it is possible it ran out or was running low on a
+reagent. The good news is it doesn&#39;t affect all of the reads, the median value
+still has a PHRED score &gt; 20 (so 1 in 100 probability of an error), and most aligners can
+take into account the poor quality so this isn&#39;t as bad as it looks.</p>
+
+<p>More worrying is the non-uniform per base sequence content plot. It depends on the genome, but
+for the mouse if you are randomly sampling
+from the transcriptome then you should expect there to be a pretty even distribution of
+GC-AT in each sequence with a slight GC/AT bias. We can see that is not the case at all,
+and the next plot, the per sequence GC content plot, has a huge GC spike in the middle.
+Usually you see plots like these when the overall complexity of the reads that are
+sequenced is low; by that we mean you have tended to sequence the same sample repeatedly.</p>
+
+<p>That notion is reinforced looking at the duplication plot. If we de-duplicate the reads,
+meaning remove reads where we have seen the same exact read twice, we&#39;d throw out &gt; 75%
+of the data. It is also reinforced by the list of kmers that are more enriched than
+would be expected by chance; a kmer is just every possible k length mer that is seen in
+a sequence. For example all 3-mers of <code>ACGT</code> are <code>ACG CGT</code>. We&#39;d expect all
+of these features if we were sequencing the same sequences repeatedly.</p>
+
+<p>One thing we would not expect, however, is the big uptick at the end of the kmer content
+plot; the sequences at the end look like some kind of adapter contamination issue. We&#39;d
+expect these reads to not align unless we trimmed the adapter sequence off.</p>
+
+<p>What are those sequences? We can search for the reads that have one of
+those enriched sequences with grep (*g*lobally search a *r*egular
+*e*xpression and *p*rint) which print out every line in a file that
+matches a search string. grep the L139_ESC_1.fq file like this:</p>
+
+<pre><code class="bash">    grep TTGATATGGG L139_ESC_1.fq
+</code></pre>
+
+<p>You should see a lot of sequences that look like this:</p>
+
+<pre><code class="bash">    AATTCGTGGAGAAAGAAATGGCTCGTCTGGCAGCATTTGATATGGG
+</code></pre>
+
+<p>If we BLAST this sequence in the mouse, we come up empty, so it is
+some kind of contaminant sequence, it isn&#39;t clear where it comes from.
+The protocol listed
+<a href="http://genome.cshlp.org/content/21/7/1160.long">here</a> doesn&#39;t have
+too many clues either. If we could figure out what these sequences
+are, it would help troubleshoot the preparation protocol and we might
+be able to align more reads. As it is, these sequences are unlikely to align to
+the mouse genome, so they mostly represent wasted sequencing.</p>
+
+<h1>Alignment</h1>
+
+<p>For aligning RNA-seq reads it is necessary to use an aligner that is splicing
+aware; reads crossing splice junctions have gaps when aligned to the
+genome and the aligner has to be able to handle that possibility.
+There are a wide variety of aligners to choose from that handle
+spliced reads but the two most commonly used are
+<a href="http://ccb.jhu.edu/software/tophat/index.shtml">Tophat</a> and
+<a href="https://code.google.com/p/rna-star/">STAR</a>. They both have similar
+accuracy but STAR is much, much faster than Tophat at the cost of
+using much more RAM; to align to the human genome you need ~ 40 GB of
+RAM, so it isn&#39;t something you will be able to run on your laptop or
+another type of RAM restricted computing environment. For this exercise
+we will use Tophat.</p>
+
+<p>To align reads with Tophat you need three things.</p>
+
+<ol>
+<li>The genome sequence of the organism you are working with in FASTA format.</li>
+<li>A gene annotation for your genome in Gene Transfer Format (GTF). For example from Ensembl.</li>
+<li>The FASTQ file of reads you want to align.</li>
+</ol>
+
+<p>First you must make an Bowtie2 index of the genome sequence; this
+allows the Tophat algorithm to quickly find regions of the genome
+where each read might align. We have done this step already, so don&#39;t
+type in these commands, but if you need to do it on your own, here is
+how to do it:</p>
+
+<pre><code class="bash">    # don&#39;t type this in
+    bowtie2-build your_fasta_file genome_name
+</code></pre>
+
+<p>We&#39;ve precomputed indexes for the mm10 genome here and downloaded a GTF file of
+Ensembl release 75 here:</p>
+
+<pre><code class="bash">    /groups/bcbio/biodata/genomes/Mmusculus/mm10/bowtie2/
+    /groups/bcbio/biodata/genomes/Mmusculus/mm10/rnaseq/ref-transcripts.gtf
+</code></pre>
+
+<p>Finally we&#39;ve precomputed an index of the gene sequences from the <code>ref-transcripts.gtf</code>
+file here:</p>
+
+<pre><code class="bash">     /groups/bcbio/biodata/genomes/Mmusculus/mm10/rnaseq/tophat/
+</code></pre>
+
+<p>We will use this precomputed index of the gene sequences instead of the GTF file because
+it is much faster; you can use either and they have the same output.</p>
+
+<p>Now we&#39;re ready to align the reads to the mm10 genome. We will align two ESC samples and two MEF samples:</p>
+
+<pre><code class="bash">    cd ~/workshop/subset
+    bsub -J L139_ESC_1 -W 00:20 -q short &quot;tophat -o L139_ESC_1_tophat --no-coverage-search --transcriptome-index=/groups/bcbio/biodata/genomes/Mmusculus/mm10/rnaseq/tophat/mm10_transcriptome /groups/bcbio/biodata/genomes/Mmusculus/mm10/bowtie2/mm10 L139_ESC_1.subset.fastq; mv L139_ESC_1_tophat/accepted_hits.bam L139_ESC_1_tophat/L139_ESC_1.bam&quot;
+    bsub -J L139_ESC_2 -W 00:20 -q short &quot;tophat -o L139_ESC_2_tophat --no-coverage-search --transcriptome-index=/groups/bcbio/biodata/genomes/Mmusculus/mm10/rnaseq/tophat/mm10_transcriptome /groups/bcbio/biodata/genomes/Mmusculus/mm10/bowtie2/mm10 L139_ESC_2.subset.fastq; mv L139_ESC_2_tophat/accepted_hits.bam L139_ESC_2_tophat/L139_ESC_2.bam&quot;
+    bsub -J L139_MEF_49 -W 00:20 -q short &quot;tophat -o L139_MEF_49_tophat --no-coverage-search --transcriptome-index=/groups/bcbio/biodata/genomes/Mmusculus/mm10/rnaseq/tophat/mm10_transcriptome /groups/bcbio/biodata/genomes/Mmusculus/mm10/bowtie2/mm10 L139_MEF_49.subset.fastq; mv L139_MEF_49_tophat/accepted_hits.bam L139_MEF_49_tophat/L139_MEF_49.bam&quot;
+    bsub -J L139_MEF_50 -W 00:20 -q short &quot;tophat -o L139_MEF_50_tophat --no-coverage-search --transcriptome-index=/groups/bcbio/biodata/genomes/Mmusculus/mm10/rnaseq/tophat/mm10_transcriptome /groups/bcbio/biodata/genomes/Mmusculus/mm10/bowtie2/mm10 L139_MEF_50.subset.fastq; mv L139_MEF_50_tophat/accepted_hits.bam L139_MEF_50_tophat/L139_MEF_50.bam&quot;
+</code></pre>
+
+<p>Each of these should complete in about ten minutes. Since we ran them all in parallel on
+the cluster, the whole set should take about ten minutes instead of 40. Full samples would
+take hours. <code>-J</code> names the job so you can see what it is when you run <code>bjobs</code> to
+check the status of the jobs. <code>-W 00:20</code> tells the scheduler the job should take about
+20 minutes. <code>-q short</code> submits the job to the short queue. At the end we tack on a command
+to move the Tophat output filename <code>accepted_hits.bam</code> to something more evocative.</p>
+
+<p>This is fine for a small number of samples, but if you wanted to run a full set of hundreds of cells, doing this manually for every sample is a waste of time and prone to errors. You can run all of these automatically by writing a loop:</p>
+
+<pre><code class="bash">    # don&#39;t type this in, it is here for future reference
+    for file in *.fastq; do
+        samplename=`basename $file .fastq`
+        bsub -W 00:20 -q short &quot;tophat -o $samplename_tophat --no-coverage-search --transcriptome-index=/groups/bcbio/biodata/genomes/Mmusculus/mm10/rnaseq/tophat/mm10_transcriptome /groups/bcbio/biodata/genomes/Mmusculus/mm10/bowtie2/mm10 $file; mv $samplename_tophat/accepted_hits.bam $samplename_tophat/$samplename.bam
+    done
+</code></pre>
+
+<p>This will loop over all of the files with a .fastq extension in the current directory and
+align them with Tophat. We&#39;ll skip ahead now to doing some quality control of the alignments
+and finally counting the reads mapping to each feature.</p>
+
+<h2>Quality checking the alignments</h2>
+
+<p>There are several tools to spot check the alignments, it is
+common to run <a href="http://www.broadinstitute.org/cancer/cga/rna-seqc">RNA-SeQC</a>
+on the alignment files to generate some alignment stats and to determine the
+overall coverage, how many genes were detected and so on. Another option for a suite of
+quality checking tools is
+<a href="http://dldcc-web.brc.bcm.edu/lilab/liguow/CGI/rseqc/_build/html/">RSeQC</a>. For real
+experiments it is worth it to look at the output of these tools and see if anything
+seems amiss.</p>
+
+<h1>Counting reads with featureCounts</h1>
+
+<p>The last step is to count the number of reads mapping to the features are are interested in.
+Quantitation can be done at multiple levels; from the level of counting the number of reads
+supporting a specific splicing event, to the number of reads aligning to an isoform of
+a gene or the total reads mapping to a known gene. We&#39;ll be quantitating the latter, the
+total number of reads that can uniquely be assigned to a gene. There are several tools to
+do this, we will use <a href="http://bioinf.wehi.edu.au/featureCounts/">featureCounts</a> because
+it is very fast and accurate.</p>
+
+<pre><code class="bash">    featureCounts --primary -a /groups/bcbio/biodata/genomes/Mmusculus/mm10/rnaseq/ref-transcripts.gtf -o combined.featureCounts L139_ESC_1_tophat/L139_ESC_1.bam L139_ESC_2_tophat/L139_ESC_2.bam L139_MEF_49_tophat/L139_MEF_49.bam L139_MEF_50_tophat/L139_MEF_50.bam
+</code></pre>
+
+<p><code>--primary</code> tells featureCounts to only count the primary alignment for reads that
+map multiple times to the genome. This ensures we do not double count reads that map to
+multiple places in the genome.</p>
+
+<p>We need to massage the format of this file so we can use it. We&#39;ll take the first column,
+which is the gene ids and every column after the 6th, which has the counts of each sample.</p>
+
+<pre><code class="bash">    sed 1d combined.featureCounts | cut -f1,7- | sed s/Geneid/id/ &gt; combined.counts
+</code></pre>
+
+<p>This command means steam edit (sed) the file combined.featureCounts, delete the first line,
+keep the first column and everything the 7th column on and change the phrase <code>Geneid</code>
+to <code>id</code>. This outputs a file in a format with <em>I</em> rows of genes and the <em>J</em> columns of samples.
+Each cell is the number of reads that can be uniquely assigned to the gene <em>i</em> the sample
+<em>j</em>. This file is of suitable format for loading into R.</p>
+
+</body>
+
+</html>
