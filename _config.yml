@@ -5,11 +5,11 @@ permalink:           pretty
 relative_permalinks: true
 
 # Setup
-title:               Poole
-tagline:             The Jekyll Butler
-url:                 http://jefworks.github.io/scw2015
+title:               Single Cell Workshop
+tagline:             HSCI/Catalyst, Nov 2015
+url:                 http://jefworks.github.io/scw2015/
 paginate:            1
-baseurl:             ""
+baseurl:             "/scw2015/"
 
 # Assets
 #
@@ -27,7 +27,7 @@ author:
 # Custom vars
 version:             2.0.0
 github:
-  repo:              https://github.com/JEFworks/scw2015
+  repo:              https://github.com/JEFworks/scw2015/
 
 
 # Conversion
