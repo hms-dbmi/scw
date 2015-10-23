@@ -7,9 +7,9 @@ relative_permalinks: true
 # Setup
 title:               Single Cell Workshop
 tagline:             HSCI/Catalyst, Nov 2015
-url:                 http://jefworks.github.io/scw2015/
+url:                 hms-dbmi.github.io/scw/
 paginate:            1
-baseurl:             "/scw2015/"
+baseurl:             "/scw/"
 
 # Assets
 #
@@ -20,14 +20,12 @@ sass:
 
 # About/contact
 author:
-  name:              Jean Fan
-  url:               https://jef.works
-  email:             jeanfan@fas.harvard.edu
+  name:              Jean Fan, Joe Herman, Assieh Saadatpour, Radhika S Khetani
 
 # Custom vars
 version:             2.0.0
 github:
-  repo:              https://github.com/JEFworks/scw2015/
+  repo:              https://github.com/hms-dbmi/scw/scw2015
 
 
 # Conversion
