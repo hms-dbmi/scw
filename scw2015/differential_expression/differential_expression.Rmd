@@ -39,9 +39,7 @@ Loading count data
 
 We will load the counts for the ES/MEF mouse dataset of Islam *et al.*, which contains 48 embyronic stem (ES) cells, and 44 mouse embryonic fibroblast (MEF) cells. We will read in these counts from the table we generated earlier:
 ```{r}
-home <- Sys.getenv("SCW_HOME")
-dataDir <- paste(home,"/data/",sep="")
-load(paste(dataDir,"counts.RData",sep=""))
+load("ES_MEF_raw.RData")
 # clean up column (cell) names
 colnames(counts) <- gsub("L139_Sample(\\d+).counts","\\1",colnames(counts))
 colnames(counts)[1:10]
@@ -111,7 +109,7 @@ nGenes <- length(counts[,1])
 
 Let's also save the full cleaned up count matrix for use in subsequent exersize:
 ```{r}
-save(counts,file=paste(dataDir,"counts.RData",sep=""))
+save(counts,file="counts.RData")
 ```
 
 Let's examine the effective library size (estimated by the average read count per gene) for the different cells.
