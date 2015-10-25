@@ -16,22 +16,22 @@ Running R on Orchestra
 ========================
 
 In order to run R on Orchestra, we will first connect to an interactive queue, using 6 cores
-```bash
-jh361@mezzanine:~/$ bsub -n 6 -Is -q interactive bash
-Job <7846600> is submitted to queue <interactive>.
-<<Waiting for dispatch ...>>
-<<Starting on clarinet002-072.orchestra>>
+```#bash
+#jh361@mezzanine:~/$ bsub -n 6 -Is -q interactive bash
+#Job <7846600> is submitted to queue <interactive>.
+#<<Waiting for dispatch ...>>
+#<<Starting on clarinet002-072.orchestra>>
 ```
 
 Set up environment variables:
-```bash
-cd scw/scw2015
-source setup.sh
+```#bash
+#cd scw/scw2015
+#source setup.sh
 ```
 
 Run R
-```bash
-R
+```#bash
+#R
 ```
 
 Loading count data
@@ -133,7 +133,7 @@ We can use a violin plot to visualize the distributions of the normalized counts
 ```{r}
 counts.norm <- t(apply(counts,1,function(x) x/coverage)) # simple normalization method
 top.genes <- tail(order(rowSums(counts.norm)),10)
-expression <- log2(counts.norm[top.genes,]+0.001) # add a small constant in case there are zeros
+expression <- log2(counts.norm[top.genes,]+1) # add a pseudocount of 1 
 ```
 ```{r,message=FALSE,results='hide'}
 library(caroline)
@@ -289,7 +289,7 @@ The package SCDE (Single-Cell Differential Expression) explicitly models this ty
 
 First we will set the number of cores to the number we selected when opening up the interactive queue:
 ```{r}
-n.cores <- 6
+n.cores <- 4 
 ```
 
 We then fit the SCDE model to the data. Since we fit models separately for each cell in SCDE, we pass in unnormalized counts.
