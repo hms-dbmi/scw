@@ -45,12 +45,12 @@ colnames(counts) <- gsub("L139_Sample(\\d+).counts","\\1",colnames(counts))
 colnames(counts)[1:10]
 ```
 
-The rows of the `counts` data frame represent genes, and the columns represent cells. However, the genes in our count file are named according to their Ensembl ID. In order to map these IDs to more informative gene names, we can use the R interface to BioMart. We will not run this procedure during this session, so as to avoid overloading the servers, but this is how it might be done:
+The rows of the `counts` data frame represent genes, and the columns represent cells. However, the genes in our count file are named according to their Ensembl ID. In order to map these IDs to more informative gene names, we can use the R interface to BioMart. We will not run this procedure during this session, so as to avoid overloading the servers with multiple simultaneous requests, but this is how it might be done:
 ```{r,eval=FALSE}
 library(biomaRt)
 mart <- useMart(biomart = 'ensembl', dataset = 'mmusculus_gene_ensembl')
 bm.query <- getBM(values=rownames(counts),attributes=c("ensembl_gene_id", "external_gene_name"),filters=c("ensembl_gene_id"),mart=mart)
-genes <- list(ids=rownames(counts),names=bm.query[match(rownames(counts), bm.query$ensembl_gene_id),]$external_gene_id)
+genes <- list(ids=rownames(counts),names=bm.query[match(rownames(counts), bm.query$ensembl_gene_id),]$external_gene_name)
 ```
 
 Gene identifiers
