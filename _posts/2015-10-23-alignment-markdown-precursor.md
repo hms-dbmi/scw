@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 #Setting up Orchestra
 
 To get on Orchestra you want to connect via ssh, and to turn X11 forwarding on. Turning X11 forwarding will let the Orchestra machines open windows on your local machine, which is useful for looking at the data.

@@ -13,6 +13,19 @@
         </h3>
       </header>
 
+      <div class="toc">
+	<hr>
+	<h1>Table of Contents</h1>
+	<ul>
+	  {% for post in site.posts %}
+	  <li>
+	    <a href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a>
+	  </li>
+	  {% endfor %}
+	</ul>
+	<hr>
+      </div>
+
       <main>
         {{ content }}
       </main>

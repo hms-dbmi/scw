@@ -9,7 +9,7 @@ title:               Single Cell Workshop
 tagline:             HSCI/Catalyst, Nov 2015
 url:                 hms-dbmi.github.io/scw/
 paginate:            1
-baseurl:             "/scw/"
+baseurl:             "/scw"
 
 # Assets
 #
@@ -32,5 +32,5 @@ github:
 markdown:         redcarpet
 redcarpet:
   extensions: ["smart", "tables", "no_intra_emphasis", "fenced_code_blocks",
-      "autolink", "strikethrough", "superscript", "with_toc_data"]
+      "autolink", "strikethrough", "superscript", "with_toc_data", "html_toc"]
 highlighter:      pygments
