@@ -1,29 +1,37 @@
 ---
-layout: default
 title: "Differential expression analysis"
 author: "Joe Herman"
+date: "10/23/2015"
+output:
+  knitrBootstrap::bootstrap_document:
+    theme: readable
+    highlight: zenburn
+    theme.chooser: TRUE
+    highlight.chooser: TRUE
+  html_document:
+    highlight: zenburn
 ---
 
 Running R on Orchestra
 ========================
 
 In order to run R on Orchestra, we will first connect to an interactive queue, using 6 cores
-```bash
-jh361@mezzanine:~/$ bsub -n 6 -Is -q interactive bash
-Job <7846600> is submitted to queue <interactive>.
-<<Waiting for dispatch ...>>
-<<Starting on clarinet002-072.orchestra>>
+```#bash
+#jh361@mezzanine:~/$ bsub -n 6 -Is -q interactive bash
+#Job <7846600> is submitted to queue <interactive>.
+#<<Waiting for dispatch ...>>
+#<<Starting on clarinet002-072.orchestra>>
 ```
 
 Set up environment variables:
-```bash
-cd scw/scw2015
-source setup.sh
+```#bash
+#cd scw/scw2015
+#source setup.sh
 ```
 
 Run R
-```bash
-R
+```#bash
+#R
 ```
 
 Loading count data
@@ -43,13 +51,13 @@ colnames(counts)[1:10]
 ##  [8] "ESC_20" "ESC_13" "MEF_70"
 ```
 
-The rows of the `counts` data frame represent genes, and the columns represent cells. However, the genes in our count file are named according to their Ensembl ID. In order to map these IDs to more informative gene names, we can use the R interface to BioMart. We will not run this procedure during this session, so as to avoid overloading the servers, but this is how it might be done:
+The rows of the `counts` data frame represent genes, and the columns represent cells. However, the genes in our count file are named according to their Ensembl ID. In order to map these IDs to more informative gene names, we can use the R interface to BioMart. We will not run this procedure during this session, so as to avoid overloading the servers with multiple simultaneous requests, but this is how it might be done:
 
 ```r
 library(biomaRt)
 mart <- useMart(biomart = 'ensembl', dataset = 'mmusculus_gene_ensembl')
 bm.query <- getBM(values=rownames(counts),attributes=c("ensembl_gene_id", "external_gene_name"),filters=c("ensembl_gene_id"),mart=mart)
-genes <- list(ids=rownames(counts),names=bm.query[match(rownames(counts), bm.query$ensembl_gene_id),]$external_gene_id)
+genes <- list(ids=rownames(counts),names=bm.query[match(rownames(counts), bm.query$ensembl_gene_id),]$external_gene_name)
 ```
 
 Gene identifiers
@@ -166,15 +174,11 @@ We can use a violin plot to visualize the distributions of the normalized counts
 ```r
 counts.norm <- t(apply(counts,1,function(x) x/coverage)) # simple normalization method
 top.genes <- tail(order(rowSums(counts.norm)),10)
-expression <- log2(counts.norm[top.genes,]+0.001) # add a small constant in case there are zeros
+expression <- log2(counts.norm[top.genes,]+1) # add a pseudocount of 1 
 ```
 
 ```r
 library(caroline)
-```
-
-```
-## Error in library(caroline): there is no package called 'caroline'
 ```
 
 ```r
@@ -182,8 +186,18 @@ violins(as.data.frame(t(expression)),connect=c(),deciles=FALSE,xlab="",ylab="log
 ```
 
 ```
-## Error in eval(expr, envir, enclos): could not find function "violins"
+## Loading required package: sm
+## Package 'sm', version 2.2-5.4: type help(sm) for summary information
+## Loading required package: MASS
+## 
+## Attaching package: 'MASS'
+## 
+## The following object is masked from 'package:sm':
+## 
+##     muscle
 ```
+
+![plot of chunk unnamed-chunk-16](figure/unnamed-chunk-16-1.svg) 
 
 Some of these genes show a clear bimodal pattern of expression, indicating the presence of two subpopulations of cells. 
 
@@ -378,7 +392,7 @@ The package SCDE (Single-Cell Differential Expression) explicitly models this ty
 First we will set the number of cores to the number we selected when opening up the interactive queue:
 
 ```r
-n.cores <- 6
+n.cores <- 4 
 ```
 
 We then fit the SCDE model to the data. Since we fit models separately for each cell in SCDE, we pass in unnormalized counts.
@@ -399,16 +413,114 @@ Differential expression analysis
 
 Using the fitted model and prior, we can now compute $p$-values for differential expression for each gene
 
+```r
+ediff <- scde.expression.difference(scde.fitted.model,counts,scde.prior,groups=groups,n.cores=n.cores)
+p.values <- 2*pnorm(abs(ediff$Z),lower.tail=F) # 2-tailed p-value
+p.values.adj <- 2*pnorm(abs(ediff$cZ),lower.tail=F) # Adjusted to control for FDR
+significant.genes <- which(p.values.adj<0.05)
+length(significant.genes)
+```
+
+```
+## [1] 2140
+```
+The adjusted $p$-values are rescaled in order to control for false discovery rate (FDR) rather than the proportion of false positives. This is one way of dealing with the issue of multiple hypothesis testing. As well as correcting for multiple testing, we can also instruct SCDE to correct for any known batch effects. Examples of this procedure can be found in the online tutorial for SCDE.
+
+We can now extract fold differences for the differentially expressed genes, with lower and upper bounds, and FDR-adjusted p-values:
+
+```r
+ord <- order(p.values.adj[significant.genes]) # order by p-value
+de <- cbind(ediff[significant.genes,1:3],p.values.adj[significant.genes])[ord,]
+colnames(de) <- c("Lower bound","log2 fold change","Upper bound","p-value")
+```
+
+Examining differentially expressed genes
+----------------------------------------
+
+Examining the top $15$ most significant differentially expressed genes, there are now additional genes related to stem cell differentiation
+
+```r
+de[1:15,]
+```
+
+```
+##        Lower bound log2 fold change Upper bound      p-value
+## Thbs1    -4.360279        -3.494635   -2.628992 8.531192e-10
+## S100a6   -4.520583        -3.687001   -2.821357 8.531192e-10
+## Col1a2   -5.193862        -3.943488   -2.853418 8.531192e-10
+## Cald1    -5.097679        -3.815244   -2.821357 8.531192e-10
+## Efcc1     3.911427         5.546532    7.662549 8.531192e-10
+## Gapdh     2.981661         3.911427    4.777070 8.531192e-10
+## Apoe      4.392340         5.770958    7.534306 8.531192e-10
+## Zfp42     4.264096         5.835079    9.393837 8.531192e-10
+## Hmgb2     4.232036         5.578592    7.021332 8.531192e-10
+## Tdh       5.546532         7.021332   10.035054 8.531192e-10
+## Tpm1     -4.584705        -3.558757   -2.532809 8.531192e-10
+## Dppa5a    5.642714         6.572480    7.406062 8.531192e-10
+## Sparc    -4.520583        -3.494635   -2.596931 8.531192e-10
+## Col1a1   -5.290045        -3.815244   -2.725174 8.531192e-10
+## Timp2    -5.161801        -3.879366   -2.821357 8.531192e-10
+```
+
+Gene     Function                                                      
+------   --------                                                      
+Dppa5a   developmental pluripotency associated                         
+Pou5f1   self-renewal of undifferentiated ES cells         
+Tdh      mitochondrial; highly expressed in ES cells  
+Zfp42    used as a marker for undifferentiated pluripotent stem cells  
+Utf1     undifferentiated ES cell transcription factor          
+
+Overlap between genes found by DESeq and SCDE
+---------------------------------------------
+
+We can also examine how many of the top $20$ genes found by both methods are the same:
+
+```r
+intersect(rownames(de)[1:20],de.genes[1:20,1])
+```
+
+```
+## [1] "Cald1"  "Dppa5a"
+```
 
 
+```r
+intersect(rownames(de)[1:20],de.genes.pooled[1:20,1])
+```
+
+```
+## [1] "Tdh"    "Dppa5a" "Pou5f1" "Utf1"
+```
+
+For our example, estimating the dispersion using the pooled method in DESeq yields more genes in common with SCDE, and the four that are annotated all have some connection to stem-cell differentiation.
+
+Expression differences for individual genes
+-------------------------------------------
+
+SCDE also provides facilities for more closely examining the expression differences for individual genes. Examining two of the genes shown above, we can see clear differences in the posterior distributions for expression magnitude.
 
 
+```r
+scde.test.gene.expression.difference("Tdh",models=scde.fitted.model,counts=counts,prior=scde.prior)
+```
 
+![plot of chunk unnamed-chunk-44](figure/unnamed-chunk-44-1.svg) 
 
+```
+##          lb     mle       ub      ce        Z       cZ
+## Tdh 5.48241 6.95721 10.22742 5.48241 7.160813 7.160813
+```
 
+```r
+scde.test.gene.expression.difference("Pou5f1",models=scde.fitted.model,counts=counts,prior=scde.prior)
+```
 
+![plot of chunk unnamed-chunk-44](figure/unnamed-chunk-44-2.svg) 
 
-
-
+```
+##              lb      mle       ub       ce        Z       cZ
+## Pou5f1 4.937375 9.265593 9.970932 4.937375 7.160813 7.160813
+```
+On these plots, the coloured curves in the background show the distributions inferred for individual cells, and the dark curves denote overall distributions. By combining information from all the cells, the model is able to infer the overall distribution with high confidence.
 
 
