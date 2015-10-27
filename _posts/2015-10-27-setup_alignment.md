@@ -1,5 +1,8 @@
 ---
 layout: default
+title: "Setup, QC and Alignment"
+author: "Radhika Khetani"
+output: html_document
 ---
 
 #Setting up Orchestra
