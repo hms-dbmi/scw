@@ -18,7 +18,7 @@ Do that and you're ready to roll. You should see that you are now connected to a
 
 The raw data we will be using for this part of the workshop lives here `/groups/pklab/scw2014/ES.MEF/subset`:
 
-    $ ls /groups/pklab/scw2014/ES.MEF/subset
+    $ ls /groups/pklab/scw/scw2015/ES.MEF.data/subset
 
 ***
 > [FASTQ](https://en.wikipedia.org/wiki/FASTQ_format) files are the standard format for sequenced reads, and that is the format you will receive from the sequencing center after they sequence your cDNA libraries.
@@ -55,14 +55,14 @@ The first thing we will do is copy the small test data over into your home direc
     $ cd
     $ mkdir workshop
     $ cd workshop
-    $ cp -r /groups/pklab/scw2014/ES.MEF/subset .
+    $ cp -r /groups/pklab/scw/scw2015/ES.MEF.data/subset .
 
 These commands mean:
 
 * change directories to your home directory (`cd` without anything following it will always bring you to your home directory)
 * make a directory (`mkdir`) named workshop
 * change into the directory (`cd`) named workshop
-* copy (`cp`) the folder `/groups/pklab/scw2014/ES.MEF/subset` and everything underneath it (using the `-r`) to the current directory (denoted by a period `.`)
+* copy (`cp`) the folder `/groups/pklab/scw/scw2015/ES.MEF.data/subset` and everything underneath it (using the `-r`) to the current directory (denoted by a period `.`)
 
 
 #Quality control
@@ -76,7 +76,7 @@ For RNA-Seq data many common issues can be detected right off the bat just by lo
 FastQC is pretty fast, especially on small files, so we can run FastQC on one of the full files (instead of just on the subset). First lets copy one of those files over:
 
     $ mkdir ~/workshop/fastq
-    $ cp /groups/pklab/scw2014/ES.MEF/fastq/L139_ESC_1.fq ~/workshop/fastq/
+    $ cp /groups/pklab/scw/scw2015/ES.MEF.data/fastq/L139_ESC_1.fq ~/workshop/fastq/
     $ cd ~/workshop/fastq
 Now we can run FastQC on the file by typing:
 
