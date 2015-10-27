@@ -146,15 +146,15 @@ We will use this precomputed index of the gene sequences instead of the GTF file
 Now we're ready to align the reads to the mm10 genome. We will align two ESC samples and two MEF samples:
 
 ```
-    $ cd ~/workshop/subset
+$ cd ~/workshop/subset
     
-    $ bsub -J L139_ESC_2 -W 00:20 -n 2 -q short "tophat -p 2 -o L139_ESC_1-tophat --no-coverage-search --transcriptome-index=/groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Annotation/Genes/tophat2_trans/genes /groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Sequence/Bowtie2Index/genome L139_ESC_1.subset.fastq; mv L139_ESC_1-tophat/accepted_hits.bam L139_ESC_1-tophat/L139_ESC_1.bam"
+$ bsub -J L139_ESC_2 -W 00:20 -n 2 -q short "tophat -p 2 -o L139_ESC_1-tophat --no-coverage-search --transcriptome-index=/groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Annotation/Genes/tophat2_trans/genes /groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Sequence/Bowtie2Index/genome L139_ESC_1.subset.fastq; mv L139_ESC_1-tophat/accepted_hits.bam L139_ESC_1-tophat/L139_ESC_1.bam"
     
-    $ bsub -J L139_ESC_2 -W 00:20 -n 2 -q short "tophat -p 2 -o L139_ESC_2-tophat --no-coverage-search --transcriptome-index=/groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Annotation/Genes/tophat2_trans/genes /groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Sequence/Bowtie2Index/genome L139_ESC_2.subset.fastq; mv L139_ESC_2-tophat/accepted_hits.bam L139_ESC_2-tophat/L139_ESC_2.bam"
+$ bsub -J L139_ESC_2 -W 00:20 -n 2 -q short "tophat -p 2 -o L139_ESC_2-tophat --no-coverage-search --transcriptome-index=/groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Annotation/Genes/tophat2_trans/genes /groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Sequence/Bowtie2Index/genome L139_ESC_2.subset.fastq; mv L139_ESC_2-tophat/accepted_hits.bam L139_ESC_2-tophat/L139_ESC_2.bam"
     
-    $ bsub -J L139_MEF_49 -W 00:20 -n 2 -q short "tophat -p 2 -o L139_MEF-49_tophat --no-coverage-search --transcriptome-index=/groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Annotation/Genes/tophat2_trans/genes /groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Sequence/Bowtie2Index/genome L139_MEF_49.subset.fastq; mv L139_MEF_49-tophat/accepted_hits.bam L139_MEF_49-tophat/L139_MEF_49.bam"
+$ bsub -J L139_MEF_49 -W 00:20 -n 2 -q short "tophat -p 2 -o L139_MEF-49_tophat --no-coverage-search --transcriptome-index=/groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Annotation/Genes/tophat2_trans/genes /groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Sequence/Bowtie2Index/genome L139_MEF_49.subset.fastq; mv L139_MEF_49-tophat/accepted_hits.bam L139_MEF_49-tophat/L139_MEF_49.bam"
     
-    $ bsub -J L139_MEF_50 -W 00:20 -n 2 -q short "tophat -p 2 -o L139_MEF-50_tophat --no-coverage-search --transcriptome-index=/groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Annotation/Genes/tophat2_trans/genes /groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Sequence/Bowtie2Index/genome L139_MEF_50.subset.fastq; mv L139_MEF_50-tophat/accepted_hits.bam L139_MEF_50-tophat/L139_MEF_50.bam"
+$ bsub -J L139_MEF_50 -W 00:20 -n 2 -q short "tophat -p 2 -o L139_MEF-50_tophat --no-coverage-search --transcriptome-index=/groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Annotation/Genes/tophat2_trans/genes /groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Sequence/Bowtie2Index/genome L139_MEF_50.subset.fastq; mv L139_MEF_50-tophat/accepted_hits.bam L139_MEF_50-tophat/L139_MEF_50.bam"
 ```
 
 Each of these should complete in about seven to ten minutes. Since we ran them all in parallel on the cluster, the whole set should take about seven to ten minutes instead of 30 - 40. Full samples would take hours. 
@@ -173,10 +173,10 @@ At the end we tack on (after the ";") a command to rename (`mv`) the Tophat outp
 This method of submitting one job at a time is fine for a small number of samples, but if you wanted to run a full set of hundreds of cells, doing this manually for every sample is a waste of time and prone to errors. You can run all of these automatically by writing a loop:
 
 ```
-    # don't type this in, it is here for future reference
-    for file in *.fastq; do
-        samplename=$(basename $file .fastq)
-        bsub -W 00:20 -n 2 -q short "tophat -p 2 -o $samplename-tophat --no-coverage-search --transcriptome-index=/groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Annotation/Genes/tophat2_trans/genes /groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Sequence/Bowtie2Index/genome $file; mv $samplename-tophat/accepted_hits.bam $samplename-tophat/$samplename.bam"
+# don't type this in, it is here for future reference
+for file in *.fastq; do
+    samplename=$(basename $file .fastq)
+    bsub -W 00:20 -n 2 -q short "tophat -p 2 -o $samplename-tophat --no-coverage-search --transcriptome-index=/groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Annotation/Genes/tophat2_trans/genes /groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Sequence/Bowtie2Index/genome $file; mv $samplename-tophat/accepted_hits.bam $samplename-tophat/$samplename.bam"
     done
 ```
 
@@ -191,9 +191,9 @@ There are several tools to spot check the alignments, it is common to run [RNA-S
 The last step is to count the number of reads mapping to the features are are interested in. Quantification can be done at multiple levels; from the level of counting the number of reads supporting a specific splicing event, to the number of reads aligning to an isoform of a gene or the total reads mapping to a known gene. We'll be quantifying the latter, i.e. the total number of reads that can uniquely be assigned to a known gene; basically looking at the location of read alignment on the genome and putting it together with the location of the gene on the genome (this information is contained in the [GTF](http://mblab.wustl.edu/GTF2.html)/annotation file). There are several tools to do this, we will use [featureCounts](http://bioinf.wehi.edu.au/featureCounts/) because it is very fast and accurate.
 
 ```
-    $ module load seq/subread/1.4.6-p3			#featureCounts is part of the subread package
+$ module load seq/subread/1.4.6-p3			#featureCounts is part of the subread package
     
-    $ featureCounts --primary -a /groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Annotation/Genes/genes.gtf -o combined.featureCounts L139_ESC_1.subset-tophat/L139_ESC_1.subset.bam L139_ESC_2.subset-tophat/L139_ESC_2.subset.bam L139_MEF_49.subset-tophat/L139_MEF_49.subset.bam L139_MEF_50.subset-tophat/L139_MEF_50.subset.bam
+$ featureCounts --primary -a /groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Annotation/Genes/genes.gtf -o combined.featureCounts L139_ESC_1.subset-tophat/L139_ESC_1.subset.bam L139_ESC_2.subset-tophat/L139_ESC_2.subset.bam L139_MEF_49.subset-tophat/L139_MEF_49.subset.bam L139_MEF_50.subset-tophat/L139_MEF_50.subset.bam
 ```    
     
 ***
