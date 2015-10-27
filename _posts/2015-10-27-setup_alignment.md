@@ -16,7 +16,7 @@ Do that and you're ready to roll. You should see that you are now connected to a
 
 #Introduction to the data
 
-The raw data we will be using for this part of the workshop lives here `/groups/pklab/scw2014/ES.MEF/subset`:
+The raw data we will be using for this part of the workshop lives here `/groups/pklab/scw/scw2015/ES.MEF.data/subset`:
 
     $ ls /groups/pklab/scw/scw2015/ES.MEF.data/subset
 
