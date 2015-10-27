@@ -1,5 +1,8 @@
 ---
 layout: default
+title: "Setup, QC and Alignment"
+author: "Radhika Khetani"
+output: html_document
 ---
 
 #Setting up Orchestra
@@ -16,9 +19,9 @@ Do that and you're ready to roll. You should see that you are now connected to a
 
 #Introduction to the data
 
-The raw data we will be using for this part of the workshop lives here `/groups/pklab/scw2014/ES.MEF/subset`:
+The raw data we will be using for this part of the workshop lives here `/groups/pklab/scw/scw2015/ES.MEF.data/subset`:
 
-    $ ls /groups/pklab/scw2014/ES.MEF/subset
+    $ ls /groups/pklab/scw/scw2015/ES.MEF.data/subset
 
 ***
 > [FASTQ](https://en.wikipedia.org/wiki/FASTQ_format) files are the standard format for sequenced reads, and that is the format you will receive from the sequencing center after they sequence your cDNA libraries.
@@ -55,14 +58,14 @@ The first thing we will do is copy the small test data over into your home direc
     $ cd
     $ mkdir workshop
     $ cd workshop
-    $ cp -r /groups/pklab/scw2014/ES.MEF/subset .
+    $ cp -r /groups/pklab/scw/scw2015/ES.MEF.data/subset .
 
 These commands mean:
 
 * change directories to your home directory (`cd` without anything following it will always bring you to your home directory)
 * make a directory (`mkdir`) named workshop
 * change into the directory (`cd`) named workshop
-* copy (`cp`) the folder `/groups/pklab/scw2014/ES.MEF/subset` and everything underneath it (using the `-r`) to the current directory (denoted by a period `.`)
+* copy (`cp`) the folder `/groups/pklab/scw/scw2015/ES.MEF.data/subset` and everything underneath it (using the `-r`) to the current directory (denoted by a period `.`)
 
 
 #Quality control
@@ -76,7 +79,7 @@ For RNA-Seq data many common issues can be detected right off the bat just by lo
 FastQC is pretty fast, especially on small files, so we can run FastQC on one of the full files (instead of just on the subset). First lets copy one of those files over:
 
     $ mkdir ~/workshop/fastq
-    $ cp /groups/pklab/scw2014/ES.MEF/fastq/L139_ESC_1.fq ~/workshop/fastq/
+    $ cp /groups/pklab/scw/scw2015/ES.MEF.data/fastq/L139_ESC_1.fq ~/workshop/fastq/
     $ cd ~/workshop/fastq
 Now we can run FastQC on the file by typing:
 
@@ -145,15 +148,17 @@ We will use this precomputed index of the gene sequences instead of the GTF file
 
 Now we're ready to align the reads to the mm10 genome. We will align two ESC samples and two MEF samples:
 
-    $ cd ~/workshop/subset
+```
+$ cd ~/workshop/subset
     
-    $ bsub -J L139_ESC_2 -W 00:20 -n 2 -q short "tophat -p 2 -o L139_ESC_1-tophat --no-coverage-search --transcriptome-index=/groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Annotation/Genes/tophat2_trans/genes /groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Sequence/Bowtie2Index/genome L139_ESC_1.subset.fastq; mv L139_ESC_1-tophat/accepted_hits.bam L139_ESC_1-tophat/L139_ESC_1.bam"
+$ bsub -J L139_ESC_2 -W 00:20 -n 2 -q short "tophat -p 2 -o L139_ESC_1-tophat --no-coverage-search --transcriptome-index=/groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Annotation/Genes/tophat2_trans/genes /groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Sequence/Bowtie2Index/genome L139_ESC_1.subset.fastq; mv L139_ESC_1-tophat/accepted_hits.bam L139_ESC_1-tophat/L139_ESC_1.bam"
     
-    $ bsub -J L139_ESC_2 -W 00:20 -n 2 -q short "tophat -p 2 -o L139_ESC_2-tophat --no-coverage-search --transcriptome-index=/groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Annotation/Genes/tophat2_trans/genes /groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Sequence/Bowtie2Index/genome L139_ESC_2.subset.fastq; mv L139_ESC_2-tophat/accepted_hits.bam L139_ESC_2-tophat/L139_ESC_2.bam"
+$ bsub -J L139_ESC_2 -W 00:20 -n 2 -q short "tophat -p 2 -o L139_ESC_2-tophat --no-coverage-search --transcriptome-index=/groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Annotation/Genes/tophat2_trans/genes /groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Sequence/Bowtie2Index/genome L139_ESC_2.subset.fastq; mv L139_ESC_2-tophat/accepted_hits.bam L139_ESC_2-tophat/L139_ESC_2.bam"
     
-    $ bsub -J L139_MEF_49 -W 00:20 -n 2 -q short "tophat -p 2 -o L139_MEF-49_tophat --no-coverage-search --transcriptome-index=/groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Annotation/Genes/tophat2_trans/genes /groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Sequence/Bowtie2Index/genome L139_MEF_49.subset.fastq; mv L139_MEF_49-tophat/accepted_hits.bam L139_MEF_49-tophat/L139_MEF_49.bam"
+$ bsub -J L139_MEF_49 -W 00:20 -n 2 -q short "tophat -p 2 -o L139_MEF-49_tophat --no-coverage-search --transcriptome-index=/groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Annotation/Genes/tophat2_trans/genes /groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Sequence/Bowtie2Index/genome L139_MEF_49.subset.fastq; mv L139_MEF_49-tophat/accepted_hits.bam L139_MEF_49-tophat/L139_MEF_49.bam"
     
-    $ bsub -J L139_MEF_50 -W 00:20 -n 2 -q short "tophat -p 2 -o L139_MEF-50_tophat --no-coverage-search --transcriptome-index=/groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Annotation/Genes/tophat2_trans/genes /groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Sequence/Bowtie2Index/genome L139_MEF_50.subset.fastq; mv L139_MEF_50-tophat/accepted_hits.bam L139_MEF_50-tophat/L139_MEF_50.bam"
+$ bsub -J L139_MEF_50 -W 00:20 -n 2 -q short "tophat -p 2 -o L139_MEF-50_tophat --no-coverage-search --transcriptome-index=/groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Annotation/Genes/tophat2_trans/genes /groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Sequence/Bowtie2Index/genome L139_MEF_50.subset.fastq; mv L139_MEF_50-tophat/accepted_hits.bam L139_MEF_50-tophat/L139_MEF_50.bam"
+```
 
 Each of these should complete in about seven to ten minutes. Since we ran them all in parallel on the cluster, the whole set should take about seven to ten minutes instead of 30 - 40. Full samples would take hours. 
 ***
@@ -170,11 +175,13 @@ At the end we tack on (after the ";") a command to rename (`mv`) the Tophat outp
 ***
 This method of submitting one job at a time is fine for a small number of samples, but if you wanted to run a full set of hundreds of cells, doing this manually for every sample is a waste of time and prone to errors. You can run all of these automatically by writing a loop:
 
-    # don't type this in, it is here for future reference
-    for file in *.fastq; do
-        samplename=$(basename $file .fastq)
-        bsub -W 00:20 -n 2 -q short "tophat -p 2 -o $samplename-tophat --no-coverage-search --transcriptome-index=/groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Annotation/Genes/tophat2_trans/genes /groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Sequence/Bowtie2Index/genome $file; mv $samplename-tophat/accepted_hits.bam $samplename-tophat/$samplename.bam"
+```
+# don't type this in, it is here for future reference
+for file in *.fastq; do
+    samplename=$(basename $file .fastq)
+    bsub -W 00:20 -n 2 -q short "tophat -p 2 -o $samplename-tophat --no-coverage-search --transcriptome-index=/groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Annotation/Genes/tophat2_trans/genes /groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Sequence/Bowtie2Index/genome $file; mv $samplename-tophat/accepted_hits.bam $samplename-tophat/$samplename.bam"
     done
+```
 
 This will loop over all of the files with a `.fastq` extension in the current directory and align them with Tophat. We'll skip ahead now to doing some quality control of the alignments and finally counting the reads mapping to each feature.
 
@@ -186,9 +193,12 @@ There are several tools to spot check the alignments, it is common to run [RNA-S
 
 The last step is to count the number of reads mapping to the features are are interested in. Quantification can be done at multiple levels; from the level of counting the number of reads supporting a specific splicing event, to the number of reads aligning to an isoform of a gene or the total reads mapping to a known gene. We'll be quantifying the latter, i.e. the total number of reads that can uniquely be assigned to a known gene; basically looking at the location of read alignment on the genome and putting it together with the location of the gene on the genome (this information is contained in the [GTF](http://mblab.wustl.edu/GTF2.html)/annotation file). There are several tools to do this, we will use [featureCounts](http://bioinf.wehi.edu.au/featureCounts/) because it is very fast and accurate.
 
-	$ module load seq/subread/1.4.6-p3			#featureCounts is part of the subread package
+```
+$ module load seq/subread/1.4.6-p3			#featureCounts is part of the subread package
     
-    $ featureCounts --primary -a /groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Annotation/Genes/genes.gtf -o combined.featureCounts L139_ESC_1.subset-tophat/L139_ESC_1.subset.bam L139_ESC_2.subset-tophat/L139_ESC_2.subset.bam L139_MEF_49.subset-tophat/L139_MEF_49.subset.bam L139_MEF_50.subset-tophat/L139_MEF_50.subset.bam
+$ featureCounts --primary -a /groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Annotation/Genes/genes.gtf -o combined.featureCounts L139_ESC_1.subset-tophat/L139_ESC_1.subset.bam L139_ESC_2.subset-tophat/L139_ESC_2.subset.bam L139_MEF_49.subset-tophat/L139_MEF_49.subset.bam L139_MEF_50.subset-tophat/L139_MEF_50.subset.bam
+```    
+    
 ***
 `--primary` tells featureCounts to only count the primary alignment for reads that map multiple times to the genome. This ensures we do not double count reads that map to multiple places in the genome.
 ***
