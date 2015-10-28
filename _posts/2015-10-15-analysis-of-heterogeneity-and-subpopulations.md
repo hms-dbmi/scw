@@ -12,7 +12,8 @@ In the last session of the workshop, we learned about the techniques that we can
 # Getting started
 
 Be sure to have the appropriate modules loaded prior to starting analyses.
-```
+
+```bash
 module load dev/python/2.7.6
 module load stats/R/3.2.1
 ```
