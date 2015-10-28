@@ -156,7 +156,7 @@ bar.positions <- barplot(coverage[ord],col=groups[ord],xaxt='n',ylab="Counts per
 axis(side=1,at=c(bar.positions[nES/2],bar.positions[nES+nMEF/2]),labels=c("ESC","MEF"),tick=FALSE)
 ```
 
-![plot of chunk unnamed-chunk-12](_posts/figure/unnamed-chunk-12-1.png) 
+![plot of chunk unnamed-chunk-12]({{ site.url }}/_posts/figure/unnamed-chunk-12-1.png)
 
 We can see that on average the expression is higher for the MEF cells. We'll filter out those cells with very low coverage
 
