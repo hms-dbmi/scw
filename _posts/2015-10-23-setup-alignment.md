@@ -151,13 +151,13 @@ Now we're ready to align the reads to the mm10 genome. We will align two ESC sam
 ```
 $ cd ~/workshop/subset
     
-$ bsub -J L139_ESC_2 -W 00:20 -n 2 -q short "tophat -p 2 -o L139_ESC_1-tophat --no-coverage-search --transcriptome-index=/groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Annotation/Genes/tophat2_trans/genes /groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Sequence/Bowtie2Index/genome L139_ESC_1.subset.fastq; mv L139_ESC_1-tophat/accepted_hits.bam L139_ESC_1-tophat/L139_ESC_1.bam"
+$ bsub -J L139_ESC_2 -W 00:20 -n 2 -q training "tophat -p 2 -o L139_ESC_1-tophat --no-coverage-search --transcriptome-index=/groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Annotation/Genes/tophat2_trans/genes /groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Sequence/Bowtie2Index/genome L139_ESC_1.subset.fastq; mv L139_ESC_1-tophat/accepted_hits.bam L139_ESC_1-tophat/L139_ESC_1.bam"
     
-$ bsub -J L139_ESC_2 -W 00:20 -n 2 -q short "tophat -p 2 -o L139_ESC_2-tophat --no-coverage-search --transcriptome-index=/groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Annotation/Genes/tophat2_trans/genes /groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Sequence/Bowtie2Index/genome L139_ESC_2.subset.fastq; mv L139_ESC_2-tophat/accepted_hits.bam L139_ESC_2-tophat/L139_ESC_2.bam"
+$ bsub -J L139_ESC_2 -W 00:20 -n 2 -q training "tophat -p 2 -o L139_ESC_2-tophat --no-coverage-search --transcriptome-index=/groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Annotation/Genes/tophat2_trans/genes /groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Sequence/Bowtie2Index/genome L139_ESC_2.subset.fastq; mv L139_ESC_2-tophat/accepted_hits.bam L139_ESC_2-tophat/L139_ESC_2.bam"
     
-$ bsub -J L139_MEF_49 -W 00:20 -n 2 -q short "tophat -p 2 -o L139_MEF-49_tophat --no-coverage-search --transcriptome-index=/groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Annotation/Genes/tophat2_trans/genes /groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Sequence/Bowtie2Index/genome L139_MEF_49.subset.fastq; mv L139_MEF_49-tophat/accepted_hits.bam L139_MEF_49-tophat/L139_MEF_49.bam"
+$ bsub -J L139_MEF_49 -W 00:20 -n 2 -q training "tophat -p 2 -o L139_MEF-49_tophat --no-coverage-search --transcriptome-index=/groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Annotation/Genes/tophat2_trans/genes /groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Sequence/Bowtie2Index/genome L139_MEF_49.subset.fastq; mv L139_MEF_49-tophat/accepted_hits.bam L139_MEF_49-tophat/L139_MEF_49.bam"
     
-$ bsub -J L139_MEF_50 -W 00:20 -n 2 -q short "tophat -p 2 -o L139_MEF-50_tophat --no-coverage-search --transcriptome-index=/groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Annotation/Genes/tophat2_trans/genes /groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Sequence/Bowtie2Index/genome L139_MEF_50.subset.fastq; mv L139_MEF_50-tophat/accepted_hits.bam L139_MEF_50-tophat/L139_MEF_50.bam"
+$ bsub -J L139_MEF_50 -W 00:20 -n 2 -q training "tophat -p 2 -o L139_MEF-50_tophat --no-coverage-search --transcriptome-index=/groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Annotation/Genes/tophat2_trans/genes /groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Sequence/Bowtie2Index/genome L139_MEF_50.subset.fastq; mv L139_MEF_50-tophat/accepted_hits.bam L139_MEF_50-tophat/L139_MEF_50.bam"
 ```
 
 Each of these should complete in about seven to ten minutes. Since we ran them all in parallel on the cluster, the whole set should take about seven to ten minutes instead of 30 - 40. Full samples would take hours. 
@@ -166,7 +166,7 @@ Each of these should complete in about seven to ten minutes. Since we ran them a
 
 `-W 00:20` tells the scheduler the job should take about 20 minutes. 
 
-`-q short` submits the job to the short queue.
+`-q training` submits the job to the training queue. [Note: If you are using your own account, please use `-q short` to submit the jobs to the short queue; the training queue can only be used by people using the training accounts.]
 
 The syntax of the tophat command is 
 `tophat -p <NUMBER OF THREADS> --no-coverage-search --transcriptome-index=<PATH TO TRASNCRIPTOME INDEX> <PATH TO GENOME INDEX> <PATH TO INPUT FASTQ>`
