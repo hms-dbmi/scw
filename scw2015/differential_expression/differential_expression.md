@@ -385,10 +385,6 @@ An alternative approach to modeling the error noise in single cells and testing 
 library(scde)
 ```
 
-```
-## Error: package or namespace load failed for 'scde'
-```
-
 One of the major sources of technical noise in single-cell RNA seq data are *dropout* events, whereby genes with a non-zero expression are not detected in some cells due to failure to amplify the RNA. 
 
 The package SCDE (Single-Cell Differential Expression) explicitly models this type of event, estimating the probability of a dropout event for each gene, in each cell. The probability of differential expression is then computed after accounting for dropouts.
@@ -404,20 +400,12 @@ We then fit the SCDE model to the data. Since we fit models separately for each 
 ```r
 scde.fitted.model <- scde.error.models(counts=counts,groups=groups,n.cores=n.cores,save.model.plots=F)
 ```
-
-```
-## Error in eval(expr, envir, enclos): could not find function "scde.error.models"
-```
 The fitting process relies on a subset of robust genes that are detected in multiple cross-cell comparisons. Since the `groups` argument is supplied, the error models for the two cell types are fit independently (using two different sets of robust genes). If the `groups` argument is omitted, the models will be fit using a common set.
 
 We also need to define a prior distribution for the gene expression magnitude. We will use the default provided by SCDE
 
 ```r
 scde.prior <- scde.expression.prior(models=scde.fitted.model,counts=counts)
-```
-
-```
-## Error in eval(expr, envir, enclos): could not find function "scde.expression.prior"
 ```
 
 Differential expression analysis
@@ -427,42 +415,14 @@ Using the fitted model and prior, we can now compute $p$-values for differential
 
 ```r
 ediff <- scde.expression.difference(scde.fitted.model,counts,scde.prior,groups=groups,n.cores=n.cores)
-```
-
-```
-## Error in eval(expr, envir, enclos): could not find function "scde.expression.difference"
-```
-
-```r
 p.values <- 2*pnorm(abs(ediff$Z),lower.tail=F) # 2-tailed p-value
-```
-
-```
-## Error in pnorm(abs(ediff$Z), lower.tail = F): object 'ediff' not found
-```
-
-```r
 p.values.adj <- 2*pnorm(abs(ediff$cZ),lower.tail=F) # Adjusted to control for FDR
-```
-
-```
-## Error in pnorm(abs(ediff$cZ), lower.tail = F): object 'ediff' not found
-```
-
-```r
 significant.genes <- which(p.values.adj<0.05)
-```
-
-```
-## Error in which(p.values.adj < 0.05): object 'p.values.adj' not found
-```
-
-```r
 length(significant.genes)
 ```
 
 ```
-## Error in eval(expr, envir, enclos): object 'significant.genes' not found
+## [1] 2146
 ```
 The adjusted $p$-values are rescaled in order to control for false discovery rate (FDR) rather than the proportion of false positives. This is one way of dealing with the issue of multiple hypothesis testing. As well as correcting for multiple testing, we can also instruct SCDE to correct for any known batch effects. Examples of this procedure can be found in the online tutorial for SCDE.
 
@@ -470,26 +430,8 @@ We can now extract fold differences for the differentially expressed genes, with
 
 ```r
 ord <- order(p.values.adj[significant.genes]) # order by p-value
-```
-
-```
-## Error in eval(expr, envir, enclos): object 'p.values.adj' not found
-```
-
-```r
 de <- cbind(ediff[significant.genes,1:3],p.values.adj[significant.genes])[ord,]
-```
-
-```
-## Error in eval(expr, envir, enclos): object 'ediff' not found
-```
-
-```r
 colnames(de) <- c("Lower bound","log2 fold change","Upper bound","p-value")
-```
-
-```
-## Error in `colnames<-`(`*tmp*`, value = c("Lower bound", "log2 fold change", : attempt to set 'colnames' on an object with less than two dimensions
 ```
 
 Examining differentially expressed genes
@@ -502,7 +444,22 @@ de[1:15,]
 ```
 
 ```
-## Error in de[1:15, ]: object of type 'closure' is not subsettable
+##        Lower bound log2 fold change Upper bound      p-value
+## Thbs1    -4.360279        -3.494635   -2.628992 8.439044e-10
+## S100a6   -4.520583        -3.687000   -2.821357 8.439044e-10
+## Col1a2   -5.193862        -3.975548   -2.853418 8.439044e-10
+## Cald1    -5.097679        -3.815244   -2.821357 8.439044e-10
+## Efcc1     3.911427         5.546531    7.694610 8.439044e-10
+## Gapdh     2.981661         3.911427    4.777070 8.439044e-10
+## Apoe      4.392340         5.770957    7.470184 8.439044e-10
+## Zfp42     4.232035         5.803018    9.361775 8.439044e-10
+## Hmgb2     4.232035         5.578592    7.021331 8.439044e-10
+## Tdh       5.578592         7.053392   10.002993 8.439044e-10
+## Tpm1     -4.584705        -3.558757   -2.532809 8.439044e-10
+## Dppa5a    5.642714         6.572479    7.406062 8.439044e-10
+## Sparc    -4.520583        -3.494635   -2.596931 8.439044e-10
+## Col1a1   -5.290044        -3.815244   -2.725174 8.439044e-10
+## Timp2    -5.161801        -3.879366   -2.821357 8.439044e-10
 ```
 
 Gene     Function                                                      
@@ -523,7 +480,7 @@ intersect(rownames(de)[1:20],de.genes[1:20,1])
 ```
 
 ```
-## character(0)
+## [1] "Cald1"  "Dppa5a"
 ```
 
 
@@ -532,7 +489,7 @@ intersect(rownames(de)[1:20],de.genes.pooled[1:20,1])
 ```
 
 ```
-## character(0)
+## [1] "Tdh"    "Dppa5a" "Pou5f1" "Utf1"
 ```
 
 For our example, estimating the dispersion using the pooled method in DESeq yields more genes in common with SCDE, and the four that are annotated all have some connection to stem-cell differentiation.
@@ -547,16 +504,22 @@ SCDE also provides facilities for more closely examining the expression differen
 scde.test.gene.expression.difference("Tdh",models=scde.fitted.model,counts=counts,prior=scde.prior)
 ```
 
+![plot of chunk unnamed-chunk-44](figure/unnamed-chunk-44-1.png) 
+
 ```
-## Error in eval(expr, envir, enclos): could not find function "scde.test.gene.expression.difference"
+##           lb     mle       ub       ce        Z       cZ
+## Tdh 5.482409 6.98927 10.22742 5.482409 7.160813 7.160813
 ```
 
 ```r
 scde.test.gene.expression.difference("Pou5f1",models=scde.fitted.model,counts=counts,prior=scde.prior)
 ```
 
+![plot of chunk unnamed-chunk-44](figure/unnamed-chunk-44-2.png) 
+
 ```
-## Error in eval(expr, envir, enclos): could not find function "scde.test.gene.expression.difference"
+##              lb      mle       ub       ce        Z       cZ
+## Pou5f1 4.969435 9.265592 9.970932 4.969435 7.160813 7.160813
 ```
 On these plots, the coloured curves in the background show the distributions inferred for individual cells, and the dark curves denote overall distributions. By combining information from all the cells, the model is able to infer the overall distribution with high confidence.
 
