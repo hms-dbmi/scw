@@ -1,7 +1,6 @@
 ---
 title: "Differential expression analysis"
 author: "Joe Herman"
-date: "10/23/2015"
 output:
   knitrBootstrap::bootstrap_document:
     theme: readable
