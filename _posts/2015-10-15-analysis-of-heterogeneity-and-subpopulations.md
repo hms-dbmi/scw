@@ -176,7 +176,7 @@ hc <- hclust(dist(t(bsp.lab)))
 heatmap(bsp.lab, Rowv=NA, Colv=as.dendrogram(hc), ColSideColors = sgCol)
 ```
 
-![plot of chunk backspin](https://raw.githubusercontent.com/JEFworks/scw2015/master/figures/backspin-1.png)
+![plot of chunk backspin](figure/backspin-1.png)
 
 We can also assess what genes are driving these subpopulations.
 
@@ -196,7 +196,7 @@ m[m > 2] <- 2
 heatmap(m, Rowv=NA, Colv=as.dendrogram(hc), col=colorRampPalette(c('blue', 'white', 'red'))(100), ColSideColors = sgCol, scale='none')
 ```
 
-![plot of chunk backspin2](https://raw.githubusercontent.com/JEFworks/scw2015/master/figures/backspin2-1.png)
+![plot of chunk backspin2](figure/backspin2-1.png)
 
 Interestingly, we can see how the green group of cells were separated into different subpopulations in the first split, although closer inspection of genes may suggest additional aspects of transcriptional heterogeneity that cut across this initial split.
 
@@ -258,7 +258,7 @@ head(knn)
 
 In the resulting summary table, `corr.a` and `corr.b` are slope and intersept of the correlated component fit, `conc.a` and `conc.b` are to the concomitant or associated fits, `corr.theta` is the NB over-dispersion, and `fail.r` is the background Poisson rate (fixed). We can also take a look at the resulting `cell.model.fits.pdf` file that is outputted to get a sense of how these parameters related to the data.
 
-![sample cell model fit](https://raw.githubusercontent.com/JEFworks/scw2015/master/figures/cell.model.fits.1.png)
+![sample cell model fit](figure/cell.model.fits.1.png)
 
 The full set of error models for all cells has been precomputed for you and can be loaded.
 
@@ -296,7 +296,7 @@ In `PAGODA`, variance of the NB/Poisson mixture processes derived from the error
 varinfo <- pagoda.varnorm(knn, counts = cd, trim = 3/ncol(cd), max.adj.var = 5, n.cores = 4, plot = TRUE)
 ```
 
-![plot of chunk varnorm](https://raw.githubusercontent.com/JEFworks/scw2015/master/figures/varnorm-1.png)
+![plot of chunk varnorm](figure/varnorm-1.png)
 
 Sequencing depth or gene coverage is typically still a major aspects of variability, as we have seen previously in our PCA analysis. We can control for the gene coverage (estimated as a number of genes with non-zero magnitude per cell) and normalize out that aspect of cell heterogeneity.
 
@@ -402,7 +402,7 @@ Next, we will combine aspects that show similar patterns (i.e. separate the same
 tamr2 <- pagoda.reduce.redundancy(tamr, distance.threshold = 0.5, plot = TRUE, cell.clustering = hc, labRow = NA, labCol = NA, box = TRUE, margins = c(0.5, 0.5), trim = 0)
 ```
 
-![plot of chunk tamr](https://raw.githubusercontent.com/JEFworks/scw2015/master/figures/tamr-1.png)
+![plot of chunk tamr](figure/tamr-1.png)
 
 Now we can view the final result as a heatmap where each row here represents a cluster of pathways where the row names are assigned to be the top overdispersed aspect in each cluster.
 
@@ -412,7 +412,7 @@ Now we can view the final result as a heatmap where each row here represents a c
 pagoda.view.aspects(tamr2, cell.clustering = hc, box = TRUE, labCol = NA, margins = c(0.5, 20), col.cols = sgCol)
 ```
 
-![plot of chunk pagoda](https://raw.githubusercontent.com/JEFworks/scw2015/master/figures/pagoda-1.png)
+![plot of chunk pagoda](figure/pagoda-1.png)
 
 We can also create an app to interactively browse the results.
 
