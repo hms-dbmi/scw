@@ -15,11 +15,11 @@
       </div>
 
       <hr>
-      <h1>Table of Contents</h1>
+      <h3>Table of Contents</h3>
       <ul style="list-style-type: none; padding:0; margin:0;">
 	{% for post in site.posts %}
 	<li>
-	  <h2><a href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a></h2>
+	  <a href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a>
 	</li>
 	{% endfor %}
       </ul>
