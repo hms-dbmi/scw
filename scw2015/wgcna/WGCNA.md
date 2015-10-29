@@ -216,7 +216,7 @@ geneTree = flashClust(as.dist(dissTOM),method="average");
 plot(geneTree, xlab="", sub="",cex=0.3);
 ```
 
-![plot of chunk module-detection](figure/module-detection1.png) 
+![plot of chunk module-detection](figure/module-detection-1.png) 
 
 ```r
 # Set the minimum module size
@@ -253,7 +253,7 @@ table(dynamicColors)
 plotDendroAndColors(geneTree, dynamicColors, "Dynamic Tree Cut", dendroLabels = FALSE, hang = 0.03, addGuide = TRUE, guideHang = 0.05, main = "Gene dendrogram and module colors")
 ```
 
-![plot of chunk module-detection](figure/module-detection2.png) 
+![plot of chunk module-detection](figure/module-detection-2.png) 
 
 ```r
 #set the diagonal of the dissimilarity to NA 
@@ -264,7 +264,7 @@ sizeGrWindow(7,7)
 TOMplot(dissTOM^4, geneTree, as.character(dynamicColors))
 ```
 
-![plot of chunk module-detection](figure/module-detection3.png) 
+![plot of chunk module-detection](figure/module-detection-3.png) 
 
 Extract modules
 
@@ -287,7 +287,7 @@ m<-t(t(datExpr[,module.order])/apply(datExpr[,module.order],2,max))
 heatmap(t(m),zlim=c(0,1),col=gray.colors(100),Rowv=NA,Colv=NA,labRow=NA,scale="none",RowSideColors=dynamicColors[module.order])
 ```
 
-![plot of chunk expression-pattern](figure/expression-pattern.png) 
+![plot of chunk expression-pattern](figure/expression-pattern-1.png) 
 
 We can now look at the module gene listings and try to interpret their functions; for instance using http://amigo.geneontology.org/rte
 
