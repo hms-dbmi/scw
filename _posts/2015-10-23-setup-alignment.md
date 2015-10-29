@@ -155,9 +155,9 @@ $ bsub -J L139_ESC_1 -W 00:20 -n 2 -q training "tophat -p 2 -o L139_ESC_1-tophat
     
 $ bsub -J L139_ESC_2 -W 00:20 -n 2 -q training "tophat -p 2 -o L139_ESC_2-tophat --no-coverage-search --transcriptome-index=/groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Annotation/Genes/tophat2_trans/genes /groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Sequence/Bowtie2Index/genome L139_ESC_2.subset.fastq; mv L139_ESC_2-tophat/accepted_hits.bam L139_ESC_2-tophat/L139_ESC_2.bam"
     
-$ bsub -J L139_MEF_49 -W 00:20 -n 2 -q training "tophat -p 2 -o L139_MEF-49_tophat --no-coverage-search --transcriptome-index=/groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Annotation/Genes/tophat2_trans/genes /groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Sequence/Bowtie2Index/genome L139_MEF_49.subset.fastq; mv L139_MEF_49-tophat/accepted_hits.bam L139_MEF_49-tophat/L139_MEF_49.bam"
+$ bsub -J L139_MEF_49 -W 00:20 -n 2 -q training "tophat -p 2 -o L139_MEF_49-tophat --no-coverage-search --transcriptome-index=/groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Annotation/Genes/tophat2_trans/genes /groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Sequence/Bowtie2Index/genome L139_MEF_49.subset.fastq; mv L139_MEF_49-tophat/accepted_hits.bam L139_MEF_49-tophat/L139_MEF_49.bam"
     
-$ bsub -J L139_MEF_50 -W 00:20 -n 2 -q training "tophat -p 2 -o L139_MEF-50_tophat --no-coverage-search --transcriptome-index=/groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Annotation/Genes/tophat2_trans/genes /groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Sequence/Bowtie2Index/genome L139_MEF_50.subset.fastq; mv L139_MEF_50-tophat/accepted_hits.bam L139_MEF_50-tophat/L139_MEF_50.bam"
+$ bsub -J L139_MEF_50 -W 00:20 -n 2 -q training "tophat -p 2 -o L139_MEF_50-tophat --no-coverage-search --transcriptome-index=/groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Annotation/Genes/tophat2_trans/genes /groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Sequence/Bowtie2Index/genome L139_MEF_50.subset.fastq; mv L139_MEF_50-tophat/accepted_hits.bam L139_MEF_50-tophat/L139_MEF_50.bam"
 ```
 
 Each of these should complete in about seven to ten minutes. Since we ran them all in parallel on the cluster, the whole set should take about seven to ten minutes instead of 30 - 40. Full samples would take hours. 
@@ -196,7 +196,7 @@ The last step is to count the number of reads mapping to the features are are in
 ```
 $ module load seq/subread/1.4.6-p3			#featureCounts is part of the subread package
     
-$ featureCounts --primary -a /groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Annotation/Genes/genes.gtf -o combined.featureCounts L139_ESC_1.subset-tophat/L139_ESC_1.subset.bam L139_ESC_2.subset-tophat/L139_ESC_2.subset.bam L139_MEF_49.subset-tophat/L139_MEF_49.subset.bam L139_MEF_50.subset-tophat/L139_MEF_50.subset.bam
+$ featureCounts --primary -a /groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Annotation/Genes/genes.gtf -o combined.featureCounts L139_ESC_1-tophat/L139_ESC_1.bam L139_ESC_2-tophat/L139_ESC_2.bam L139_MEF_49-tophat/L139_MEF_49.bam L139_MEF_50-tophat/L139_MEF_50.bam
 ```    
     
 ***
