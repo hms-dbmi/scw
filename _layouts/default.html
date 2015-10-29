@@ -6,30 +6,29 @@
   <body>
 
     <div class="container content">
-      <header class="masthead">
+
+      <div align="center" style="padding-top:20px">
         <h3 class="masthead-title">
           <a href="{{ site.baseurl }}/" title="Home">{{ site.title }}</a>
-          <small>{{ site.tagline }}</small>
         </h3>
-      </header>
-
-      <div class="toc">
-	<hr>
-	<h1>Table of Contents</h1>
-	<ul>
-	  {% for post in site.posts %}
-	  <li>
-	    <a href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a>
-	  </li>
-	  {% endfor %}
-	</ul>
-	<hr>
+	<a href="http://hsci.harvard.edu/event/single-cell-genomics-workshops"><img src='http://pklab.med.harvard.edu/scw2014/hscicat.png'></a>
       </div>
+
+      <hr>
+      <h1>Table of Contents</h1>
+      <ul style="list-style-type: none; padding:0; margin:0;">
+	{% for post in site.posts %}
+	<li>
+	  <h2><a href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a></h2>
+	</li>
+	{% endfor %}
+      </ul>
+      <hr>
 
       <main>
         {{ content }}
       </main>
-
+      
       <footer class="footer">
         <small>
           &copy; <time datetime="{{ site.time | date_to_xmlschema }}">{{ site.time | date: '%Y' }}</time>. All rights reserved.
