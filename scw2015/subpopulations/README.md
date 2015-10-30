@@ -2,11 +2,7 @@
 
 Materials for the [Analysis of heterogeneity and subpopulations session of the HSCI/Catalyst single cell RNA-Seq workshop, Nov 2015](http://hsci.harvard.edu/event/single-cell-genomics-workshops)
 
----
-title: "Analysis of heterogeneity and subpopulations"
-author: "Jean Fan"
-date: "October 15, 2015"
-output: html_document
+
 ---
 
 In the last session of the workshop, we learned about the techniques that we can use to identify differentially expressed genes when we have two subpopulations of interest. Now, in this session, we will become familiar with a few computational techniques we can use to discover and characterize subpopulations using single cell RNA-seq data. 
