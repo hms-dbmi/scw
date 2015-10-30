@@ -32,9 +32,29 @@
       <footer class="footer">
         <small>
           &copy; <time datetime="{{ site.time | date_to_xmlschema }}">{{ site.time | date: '%Y' }}</time>. All rights reserved.
-        </small>
+	  <b><a href="#" class="scrollup">Scroll to top</a></b>
+        </small>	
       </footer>
     </div>
 
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
+    <script>
+      $(document).ready(function () {
+      $(window).scroll(function () {
+      if ($(this).scrollTop() > 100) {
+      $('.scrollup').fadeIn();
+      } else {
+      $('.scrollup').fadeOut();
+      }
+      });
+      $('.scrollup').click(function () {
+      $("html, body").animate({
+      scrollTop: 0
+      }, 600);
+      return false;
+      });
+      });
+    </script>
+    
   </body>
 </html>
