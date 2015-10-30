@@ -29,7 +29,7 @@ module load stats/R/3.2.1-Cairo
 
 A single cell dataset from [Pollen et al.](http://www.nature.com/nbt/journal/v32/n10/abs/nbt.2967.html) has been pre-prepared for you. The data is provided as a matrix of gene counts, where each column corresponds to a cell and each row a gene. 
 
-```{r 'clean'}
+```{r, 'clean'}
 # load and clean data
 load('/groups/pklab/scw/scw2015/subpopulations/data_clean.RData')
 cd[1:5, 1:5]
@@ -57,7 +57,7 @@ head(sg, 5)
 
 Note that there are over 10,000 genes that can be used to cluster cells into subpopulations. One fast, easy, and common technique to identify subpopulations is by using dimensionality reduction to summarize the data into 2 dimensions and then visually identify obvious clusters. Principal component analysis is a linear dimensionality reduction method.
 
-```{r 'pca', fig.width=5, fig.height=5}
+```{r, 'pca', fig.width=5, fig.height=5}
 dim(mat)
 # use principal component analysis for dimensionality reduction
 base.pca <- prcomp(t(mat))
@@ -68,7 +68,7 @@ plot(base.pca$x[,1], base.pca$x[,2], col=sgCol, pch=16, main='PCA')
 
 Note that principal component analysis generally separates our subpopulations based on their expected group labels. However, cells do not segregate into obvious clusters. Furthermore, one of the main driving axis of variation here appears to be library size.
 
-```{r 'pca2', fig.width=5, fig.height=5}
+```{r, 'pca2', fig.width=5, fig.height=5}
 # scale to 1 to 100 range
 libSize <- colSums(cd > 0) # number of genes detected per cell as proxy
 libSize <- libSize - min(libSize) + 1
@@ -83,7 +83,7 @@ plot(base.pca$x[,1], base.pca$x[,2], col=libCol, pch=16, main='PCA')
 
 tSNE is a non-linear dimensionality reduction method. With tSNE, one group of cells do seem to segregate cleanly from the rest. If we did not have knowledge of the true group labels, we would be inclined to call this outgroup a subpopulation. 
 
-```{r 'tsne', fig.width=5, fig.height=5}
+```{r, 'tsne', fig.width=5, fig.height=5}
 require(Rtsne)
 d <- stats::dist(t(mat))
 set.seed(0) # tsne has some stochastic steps (gradient descent) so need to set random 
@@ -97,7 +97,7 @@ Still, we may be wondering what genes are driving this subpopulation? What genes
 
 Standard hierarchical clustering uses genes to identify distinct classes of cells. In combination with a heatmap visualization, genes driving the hierarchical clustering can become readily apparent. However, most genes are not informative and contribute, at best, noise, resulting in an inaccurate clustering of cells.
 
-```{r 'hclust', fig.width=5, fig.height=5}
+```{r, 'hclust', fig.width=5, fig.height=5}
 # for the sake of speed, just select top 100 most variable genes
 v <- apply(mat, 1, var)
 vi <- names(sort(v)[1:100])
@@ -112,7 +112,7 @@ Biclustering can be used to overcome this problem by simultaneously clustering g
 
 BackSPIN requires a particular CEF file as the input, so first, we will write out our data into that format.
 
-```{r 'backspin'}
+```{r, 'backspin'}
 write(file="cd.cef", paste("CEF\t0\t1\t1", nrow(cd), ncol(cd), "0", sep="\t"))
 write(file="cd.cef", paste('\t', c("cell"), paste(colnames(cd), collapse="\t"), sep='\t'), append=T)
 x <- cbind(rep("",nrow(cd)), cd)
@@ -122,13 +122,13 @@ write.table(file="cd.cef", x, append=T, col.names=F, row.names=T, quote=F, sep="
 
 Now we can run BackSPIN by calling Python from within R.
 
-```{r 'backspin'}
+```{r, 'backspin2'}
 system("/groups/pklab/scw2015/jfan/BackSPIN-1.0/backSPIN.py -i cd.cef -o cd.clustered.cef -f 2000 -v -d 3")
 ```
 
 Now we can read the results back into R and visualize. We can note how BackSPIN first splits the red and green groups of cells from the blue and purple cells, and then proceeds to iteratively split within each of the identified groups.
 
-```{r 'backspin', fig.width=5, fig.height=5}
+```{r, 'backspin3', fig.width=5, fig.height=5}
 bsp.head <- read.delim("cd.clustered.cef", sep="\t", stringsAsFactors=F, nrows=5, skip=1, header=F)
 bsp.lab <- bsp.head[-c(1,2),-c(1:6)]
 colnames(bsp.lab) <- bsp.head[1,-c(1:6)]
@@ -140,7 +140,7 @@ heatmap(bsp.lab, Rowv=NA, Colv=as.dendrogram(hc), ColSideColors = sgCol)
 
 We can also assess what genes are driving these subpopulations.
 
-```{r 'backspin2', fig.width=5, fig.height=5}
+```{r, 'backspin4', fig.width=5, fig.height=5}
 bsp.genes <- read.delim("cd.clustered.cef",stringsAsFactors=F,sep="\t",skip=7,header=T)
 bsp.sets <- unlist(apply(bsp.genes[,c(3,4,5)],2,function(x) tapply(bsp.genes[,1],as.factor(x),I)),recursive=F)
 # Look at one set
@@ -163,7 +163,7 @@ Interestingly, we can see how the green group of cells were separated into diffe
 
 PAGODA routines are implemented within the [SCDE R package](https://github.com/hms-dbmi/scde). This has already been installed for you.
 
-```{r eval=FALSE}
+```{r, eval=FALSE}
 # DO NOT EVALUATE
 # This package has already been installed for you
 require(devtools)
@@ -174,7 +174,7 @@ Error models are first fitted for each single cell. The purpose of the fitting i
 
 The fitting process relies on a subset of robust genes that are detected in multiple cross-cell comparisons. Due to the number of cross-cell comparisons, this step is fairly computationally intensive. For the purpose of example, we will compute error models for a small subset of 10 cells. 
 
-```{r 'model fits'}
+```{r, 'model fits'}
 library(scde)
 knn <- knn.error.models(cd[, 1:10], k = ncol(cd)/5, n.cores = 4, min.count.threshold = 2, min.nonfailed = 5, max.model.plots = 5, save.model.plots = TRUE, verbose = 1)  # turn on verbosity
 head(knn)
@@ -186,13 +186,13 @@ In the resulting summary table, `corr.a` and `corr.b` are slope and intersept of
 
 The full set of error models for all cells has been precomputed for you and can be loaded.
 
-```{r 'knn'}
+```{r, 'knn'}
 load('/groups/pklab/scw2015/jfan/knn.RData')
 ```
 
 Particularly poor cells may result in abnormal fits, most commonly showing negtive `corr.a`, and should be removed.
 
-```{r 'filter'}
+```{r, 'filter'}
 # filter out cells that don't show positive correlation with
 # the expected expression magnitudes (very poor fits)
 valid.cells <- knn$corr.a > 0
@@ -204,13 +204,13 @@ knn <- knn[valid.cells, ]
 
 In `PAGODA`, variance of the NB/Poisson mixture processes derived from the error modeling step are modeled as a chi-squared distribution using adjusted degrees of freedom and observation weights based on the drop-out probability of a given gene. Additional details can be found in the [PAGODA](http://biorxiv.org/content/early/2015/09/16/026948) manuscript. 
     
-```{r 'varnorm', fig.width=8, fig.height=5}
+```{r, 'varnorm', fig.width=8, fig.height=5}
 varinfo <- pagoda.varnorm(knn, counts = cd, trim = 3/ncol(cd), max.adj.var = 5, n.cores = 4, plot = TRUE)
 ```
 
 Sequencing depth or gene coverage is typically still a major aspects of variability, as we have seen previously in our PCA analysis. We can control for the gene coverage (estimated as a number of genes with non-zero magnitude per cell) and normalize out that aspect of cell heterogeneity.
 
-```{r 'varnorm'}
+```{r, 'varnorm2'}
 varinfo <- pagoda.subtract.aspect(varinfo, colSums(cd[, rownames(knn)]>0))
 ```
 
@@ -218,7 +218,7 @@ We assess for overdispersion in gene sets, we can take advantage of pre-defined 
 
 A set of GO terms has been pre-defined for you and can be loaded. However, the code is provided for you to show how these GO terms were obtained. 
 
-```{r 'GO' eval=FALSE}
+```{r, 'GO', eval=FALSE}
 # DO NOT EVALUATE
 # code is provided to show you how the GO terms were derived
 
@@ -241,7 +241,7 @@ names(go.env) <- paste(names(go.env), desc)  # append description to the names
 go.env <- list2env(go.env)  
 ```
 
-```{r 'GO' eval=FALSE}
+```{r, 'GO2', eval=FALSE}
 load('/groups/pklab/scw2015/jfan/go.env.RData')
 # pathway overdispersion
 pwpca <- pagoda.pathway.wPCA(varinfo, go.env, n.components = 1, n.cores = 4, n.internal.shuffles = 0)
@@ -249,20 +249,20 @@ pwpca <- pagoda.pathway.wPCA(varinfo, go.env, n.components = 1, n.cores = 4, n.i
 
 Instead of relying on pre-defined pathways, we can also test on 'de novo' gene sets whose expression profiles are well-correlated within the given dataset.
 
-```{r 'denovo' eval=FALSE}
+```{r, 'denovo', eval=FALSE}
 # de novo gene sets
 clpca <- pagoda.gene.clusters(varinfo, trim = 7.1/ncol(varinfo$mat), n.clusters = 150, n.cores = 4, plot = FALSE)
 ```
 
 Testing these pre-defined pathways and annotated gene sets may take a few minutes. If you are having trouble keeping up, you can load a pre-computed version.
 
-```{r 'clusters'}
+```{r, 'clusters'}
 load('/groups/pklab/scw2015/jfan/clusters.RData')
 ```
 
 Taking into consideration both pre-defined pathways and de-novo gene sets, we can see which aspects of heterogeneity are the most overdispersed and base our cell cluster only on the most overdispersed and informative pathways and gene sets. 
 
-```{r 'topasp'}
+```{r, 'topasp'}
 # get full info on the top aspects
 df <- pagoda.top.aspects(pwpca, clpca, z.score = 1.96, return.table = TRUE)
 head(df)
@@ -273,27 +273,27 @@ hc <- pagoda.cluster.cells(tam, varinfo)
 
 Because many of our annotated pathways and de novo gene sets likely share many genes or exhibit similarpatterns of variability, we must reduce such redundancy. First, we will combine pathways that are driven by the same sets of genes.
 
-```{r 'tamr'}
+```{r, 'tamr'}
 # reduce redundant aspects
 tamr <- pagoda.reduce.loading.redundancy(tam, pwpca, clpca)
 ```
 
 Next, we will combine aspects that show similar patterns (i.e. separate the same sets of cells). In the following heatmap, the columns are cells, rows are different significant aspects, clustered by their similarity pattern.The green-to-orange color scheme shows low-to-high weighted PCA scores (aspect patterns), where generally orange indicates higher expression. We can see how redundant aspects are clustered together. 
 
-```{r 'tamr', fig.width=8, fig.height=5}
+```{r, 'tamr2', fig.width=8, fig.height=5}
 tamr2 <- pagoda.reduce.redundancy(tamr, distance.threshold = 0.5, plot = TRUE, cell.clustering = hc, labRow = NA, labCol = NA, box = TRUE, margins = c(0.5, 0.5), trim = 0)
 ```
 
 Now we can view the final result as a heatmap where each row here represents a cluster of pathways where the row names are assigned to be the top overdispersed aspect in each cluster.
 
-```{r 'pagoda', fig.width=8, fig.height=5}
+```{r, 'pagoda', fig.width=8, fig.height=5}
 # view final result
 pagoda.view.aspects(tamr2, cell.clustering = hc, box = TRUE, labCol = NA, margins = c(0.5, 20), col.cols = rbind(sgCol))
 ```
 
 We can also create an app to interactively browse the results.
 
-```{r 'app' eval=FALSE}
+```{r, 'app', eval=FALSE}
 # compile a browsable app
 app <- make.pagoda.app(tamr2, tam, varinfo, go.env, pwpca, clpca, col.cols = rbind(sgCol), cell.clustering = hc, title = "NPCs")
 # show app in the browser (port 1468)
