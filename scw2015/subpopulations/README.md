@@ -3,24 +3,28 @@
 Materials for the [Analysis of heterogeneity and subpopulations session of the HSCI/Catalyst single cell RNA-Seq workshop, Nov 2015](http://hsci.harvard.edu/event/single-cell-genomics-workshops)
 
 ---
-
-# Analysis of heterogeneity and subpopulations
+title: "Analysis of heterogeneity and subpopulations"
+author: "Jean Fan"
+date: "October 15, 2015"
+output: html_document
+---
 
 In the last session of the workshop, we learned about the techniques that we can use to identify differentially expressed genes when we have two subpopulations of interest. Now, in this session, we will become familiar with a few computational techniques we can use to discover and characterize subpopulations using single cell RNA-seq data. 
 
 # Getting started
 
-Be sure to have the appropriate modules loaded prior to starting analyses. 
+Be sure to have the appropriate modules loaded prior to starting analyses. For this workshop, this has already been done for you.
 ```
 module load dev/python/2.7.6
-module load stats/R/3.2.1
+module load stats/R/3.2.1-Cairo
 ```
 
 A single cell dataset from [Pollen et al.](http://www.nature.com/nbt/journal/v32/n10/abs/nbt.2967.html) has been pre-prepared for you. The data is provided as a matrix of gene counts, where each column corresponds to a cell and each row a gene. 
 
+
 ```r
 # load and clean data
-load('data_clean.RData')
+load('/groups/pklab/scw/scw2015/subpopulations/data_clean.RData')
 cd[1:5, 1:5]
 ```
 
@@ -90,7 +94,7 @@ sgCol <- rainbow(length(levels(sg)))[sg]
 plot(base.pca$x[,1], base.pca$x[,2], col=sgCol, pch=16, main='PCA')
 ```
 
-![plot of chunk pca](figures/pca-1.png) 
+![plot of chunk pca](figure/pca-1.png) 
 
 Note that principal component analysis generally separates our subpopulations based on their expected group labels. However, cells do not segregate into obvious clusters. Furthermore, one of the main driving axis of variation here appears to be library size.
 
@@ -106,7 +110,7 @@ libCol <- colorRampPalette(c('blue', 'yellow', 'red'))(100)[libSize]
 plot(base.pca$x[,1], base.pca$x[,2], col=libCol, pch=16, main='PCA')
 ```
 
-![plot of chunk pca2](figures/pca2-1.png) 
+![plot of chunk pca2](figure/pca2-1.png) 
 
 # tSNE
 
@@ -121,7 +125,7 @@ tsne_out <- Rtsne(d, is_distance=TRUE, perplexity=10, verbose = FALSE)
 plot(tsne_out$Y, col=sgCol, pch=16, main='tSNE')
 ```
 
-![plot of chunk tsne](figures/tsne-1.png) 
+![plot of chunk tsne](figure/tsne-1.png) 
 
 Still, we may be wondering what genes are driving this subpopulation? What genes or pathways characterize this subpopulation? For that, additional analysis is often needed and dimensionality reduction alone does not provide us with such insight. 
 
@@ -139,11 +143,13 @@ hc <- hclust(dist(t(mat[vi,])))
 heatmap(mat[vi,], Rowv=NA, Colv=as.dendrogram(hc), ColSideColors = sgCol,  col=colorRampPalette(c('blue', 'white', 'red'))(100))
 ```
 
-![plot of chunk hclust](figures/hclust-1.png) 
+![plot of chunk hclust](figure/hclust-1.png) 
 
 # BackSPIN
 
-Biclustering can be used to overcome this problem by simultaneously clustering genes and cells. [BackSPIN](http://www.sciencemag.org/content/347/6226/1138.full) is an iterative, biclustering method based on sorting points into neighborhoods that can be used to cluster genes and cells to identify subpopulations as well as potential markers for each subpopulations. BackSPIN requires a particular CEF file as the input, so first, we will write out our data into that format.
+Biclustering can be used to overcome this problem by simultaneously clustering genes and cells. [BackSPIN](http://www.sciencemag.org/content/347/6226/1138.full) is an iterative, biclustering method based on sorting points into neighborhoods that can be used to cluster genes and cells to identify subpopulations as well as potential markers for each subpopulations. BackSPIN has already been downloaded and installed for you, but if you are doing this at home, please consult the [BackSPIN installation instructions](https://github.com/linnarsson-lab/BackSPIN).
+
+BackSPIN requires a particular CEF file as the input, so first, we will write out our data into that format.
 
 
 ```r
@@ -158,7 +164,7 @@ Now we can run BackSPIN by calling Python from within R.
 
 
 ```r
-system("./BackSPIN-1.0/backSPIN.py -i cd.cef -o cd.clustered.cef -f 2000 -v -d 3")
+system("/groups/pklab/scw2015/jfan/BackSPIN-1.0/backSPIN.py -i cd.cef -o cd.clustered.cef -f 2000 -v -d 3")
 ```
 
 Now we can read the results back into R and visualize. We can note how BackSPIN first splits the red and green groups of cells from the blue and purple cells, and then proceeds to iteratively split within each of the identified groups.
@@ -174,7 +180,7 @@ hc <- hclust(dist(t(bsp.lab)))
 heatmap(bsp.lab, Rowv=NA, Colv=as.dendrogram(hc), ColSideColors = sgCol)
 ```
 
-![plot of chunk backspin](figures/backspin-1.png) 
+![plot of chunk backspin3](figure/backspin3-1.png) 
 
 We can also assess what genes are driving these subpopulations.
 
@@ -194,7 +200,7 @@ m[m > 2] <- 2
 heatmap(m, Rowv=NA, Colv=as.dendrogram(hc), col=colorRampPalette(c('blue', 'white', 'red'))(100), ColSideColors = sgCol, scale='none')
 ```
 
-![plot of chunk backspin2](figures/backspin2-1.png) 
+![plot of chunk backspin4](figure/backspin4-1.png) 
 
 Interestingly, we can see how the green group of cells were separated into different subpopulations in the first split, although closer inspection of genes may suggest additional aspects of transcriptional heterogeneity that cut across this initial split. 
 
@@ -202,7 +208,7 @@ Interestingly, we can see how the green group of cells were separated into diffe
 
 [PAGODA](http://biorxiv.org/content/early/2015/09/16/026948) is a method developed by the Kharchenko lab that enables identification and characterization of subpopulations in a manner that potentially resolves multiple overlapping aspects of transcriptional heterogeneity. 
 
-PAGODA routines are implemented within the SCDE R package. 
+PAGODA routines are implemented within the [SCDE R package](https://github.com/hms-dbmi/scde). This has already been installed for you.
 
 
 ```r
@@ -224,6 +230,184 @@ knn <- knn.error.models(cd[, 1:10], k = ncol(cd)/5, n.cores = 4, min.count.thres
 
 ```
 ## cell : calculating cell-cell similarities ... done
+## cell.6 : Hi_NPC_12
+## Classification: weighted 
+##    1 Log-likelihood :  -27950.9366 
+##    2 Log-likelihood :  -27784.5981 
+##    3 Log-likelihood :  -27750.2580 
+##    4 Log-likelihood :  -27735.8509 
+##    5 Log-likelihood :  -27728.5924 
+##    6 Log-likelihood :  -27724.9871 
+##    7 Log-likelihood :  -27723.2638 
+##    8 Log-likelihood :  -27722.4683 
+##    9 Log-likelihood :  -27722.1164 
+##   10 Log-likelihood :  -27721.9627 
+##   11 Log-likelihood :  -27721.8973 
+##   12 Log-likelihood :  -27721.8671 
+##   13 Log-likelihood :  -27721.8700 
+## converged
+## cell.7 : Hi_NPC_2
+## Classification: weighted 
+##    1 Log-likelihood :  -29898.2790 
+##    2 Log-likelihood :  -29720.3320 
+##    3 Log-likelihood :  -29683.0876 
+##    4 Log-likelihood :  -29668.5743 
+##    5 Log-likelihood :  -29662.5818 
+##    6 Log-likelihood :  -29660.3454 
+##    7 Log-likelihood :  -29659.5738 
+##    8 Log-likelihood :  -29659.3239 
+##    9 Log-likelihood :  -29659.2561 
+##   10 Log-likelihood :  -29659.2513 
+## converged 
+## cell.8 : Hi_NPC_7
+## Classification: weighted 
+##    1 Log-likelihood :  -29626.6168 
+##    2 Log-likelihood :  -29440.7117 
+##    3 Log-likelihood :  -29402.3455 
+##    4 Log-likelihood :  -29387.0396 
+##    5 Log-likelihood :  -29380.0389 
+##    6 Log-likelihood :  -29376.9927 
+##    7 Log-likelihood :  -29375.7282 
+##    8 Log-likelihood :  -29375.2366 
+##    9 Log-likelihood :  -29375.0724 
+##   10 Log-likelihood :  -29375.0436 
+## converged
+## cell.9 : Hi_NPC_6
+## Classification: weighted 
+##    1 Log-likelihood :  -29112.5439 
+##    2 Log-likelihood :  -28965.9552 
+##    3 Log-likelihood :  -28935.2605 
+##    4 Log-likelihood :  -28923.9458 
+##    5 Log-likelihood :  -28919.9151 
+##    6 Log-likelihood :  -28918.6736 
+##    7 Log-likelihood :  -28918.3789 
+##    8 Log-likelihood :  -28918.3620 
+## converged
+## cell.10 : Hi_NPC_8
+## Classification: weighted 
+##    1 Log-likelihood :  -27835.5284 
+##    2 Log-likelihood :  -27630.0450 
+##    3 Log-likelihood :  -27592.3698 
+##    4 Log-likelihood :  -27576.8180 
+##    5 Log-likelihood :  -27567.9709 
+##    6 Log-likelihood :  -27562.4037 
+##    7 Log-likelihood :  -27558.9035 
+##    8 Log-likelihood :  -27556.7712 
+##    9 Log-likelihood :  -27555.5112 
+##   10 Log-likelihood :  -27554.7764 
+##   11 Log-likelihood :  -27554.3520 
+##   12 Log-likelihood :  -27554.1174 
+##   13 Log-likelihood :  -27553.9906 
+##   14 Log-likelihood :  -27553.9250 
+##   15 Log-likelihood :  -27553.8941 
+##   16 Log-likelihood :  -27553.8818 
+## converged 
+## cell.4 : Hi_NPC_15
+## Classification: weighted 
+##    1 Log-likelihood :  -27730.0646 
+##    2 Log-likelihood :  -27591.9074 
+##    3 Log-likelihood :  -27567.8112 
+##    4 Log-likelihood :  -27557.6895 
+##    5 Log-likelihood :  -27551.5611 
+##    6 Log-likelihood :  -27547.5715 
+##    7 Log-likelihood :  -27544.8740 
+##    8 Log-likelihood :  -27543.0543 
+##    9 Log-likelihood :  -27541.8687 
+##   10 Log-likelihood :  -27541.0897 
+##   11 Log-likelihood :  -27540.5782 
+##   12 Log-likelihood :  -27540.2427 
+##   13 Log-likelihood :  -27540.0209 
+##   14 Log-likelihood :  -27539.8730 
+##   15 Log-likelihood :  -27539.7698 
+##   16 Log-likelihood :  -27539.7002 
+##   17 Log-likelihood :  -27539.6523 
+##   18 Log-likelihood :  -27539.6179 
+##   19 Log-likelihood :  -27539.5962 
+## converged
+## cell.5 : Hi_NPC_13
+## Classification: weighted 
+##    1 Log-likelihood :  -27027.7515 
+##    2 Log-likelihood :  -26853.7804 
+##    3 Log-likelihood :  -26826.6040 
+##    4 Log-likelihood :  -26816.3130 
+##    5 Log-likelihood :  -26810.6075 
+##    6 Log-likelihood :  -26807.0894 
+##    7 Log-likelihood :  -26804.8854 
+##    8 Log-likelihood :  -26803.5131 
+##    9 Log-likelihood :  -26802.6566 
+##   10 Log-likelihood :  -26802.1200 
+##   11 Log-likelihood :  -26801.7852 
+##   12 Log-likelihood :  -26801.5730 
+##   13 Log-likelihood :  -26801.4411 
+##   14 Log-likelihood :  -26801.3585 
+##   15 Log-likelihood :  -26801.2982 
+##   16 Log-likelihood :  -26801.2578 
+##   17 Log-likelihood :  -26801.2314 
+## converged 
+## cell.1 : Hi_NPC_1
+## Classification: weighted 
+##    1 Log-likelihood :  -26745.6919 
+##    2 Log-likelihood :  -26525.5251 
+##    3 Log-likelihood :  -26483.3074 
+##    4 Log-likelihood :  -26467.8824 
+##    5 Log-likelihood :  -26459.5470 
+##    6 Log-likelihood :  -26454.0420 
+##    7 Log-likelihood :  -26450.1877 
+##    8 Log-likelihood :  -26447.3954 
+##    9 Log-likelihood :  -26445.3758 
+##   10 Log-likelihood :  -26443.9395 
+##   11 Log-likelihood :  -26442.9195 
+##   12 Log-likelihood :  -26442.2047 
+##   13 Log-likelihood :  -26441.6953 
+##   14 Log-likelihood :  -26441.3377 
+##   15 Log-likelihood :  -26441.0821 
+##   16 Log-likelihood :  -26440.8983 
+##   17 Log-likelihood :  -26440.7637 
+##   18 Log-likelihood :  -26440.6672 
+##   19 Log-likelihood :  -26440.5976 
+##   20 Log-likelihood :  -26440.5406 
+##   21 Log-likelihood :  -26440.5094 
+##   22 Log-likelihood :  -26440.4708 
+##   23 Log-likelihood :  -26440.4515 
+## converged
+## cell.2 : Hi_NPC_10
+## Classification: weighted 
+##    1 Log-likelihood :  -27497.5471 
+##    2 Log-likelihood :  -27384.6235 
+##    3 Log-likelihood :  -27364.3654 
+##    4 Log-likelihood :  -27356.0647 
+##    5 Log-likelihood :  -27351.3818 
+##    6 Log-likelihood :  -27348.4820 
+##    7 Log-likelihood :  -27346.6521 
+##    8 Log-likelihood :  -27345.5050 
+##    9 Log-likelihood :  -27344.7872 
+##   10 Log-likelihood :  -27344.3270 
+##   11 Log-likelihood :  -27344.0356 
+##   12 Log-likelihood :  -27343.8348 
+##   13 Log-likelihood :  -27343.6995 
+##   14 Log-likelihood :  -27343.6141 
+##   15 Log-likelihood :  -27343.5515 
+##   16 Log-likelihood :  -27343.5098 
+##   17 Log-likelihood :  -27343.4740 
+##   18 Log-likelihood :  -27343.4524 
+## converged
+## cell.3 : Hi_NPC_14
+## Classification: weighted 
+##    1 Log-likelihood :  -26872.8753 
+##    2 Log-likelihood :  -26719.4485 
+##    3 Log-likelihood :  -26691.1567 
+##    4 Log-likelihood :  -26680.3835 
+##    5 Log-likelihood :  -26674.8907 
+##    6 Log-likelihood :  -26671.7274 
+##    7 Log-likelihood :  -26669.8186 
+##    8 Log-likelihood :  -26668.7103 
+##    9 Log-likelihood :  -26668.0707 
+##   10 Log-likelihood :  -26667.6901 
+##   11 Log-likelihood :  -26667.4857 
+##   12 Log-likelihood :  -26667.3841 
+##   13 Log-likelihood :  -26667.3380 
+##   14 Log-likelihood :  -26667.3194 
+## converged
 ```
 
 ```r
@@ -232,37 +416,37 @@ head(knn)
 
 ```
 ##             conc.b    conc.a    fail.r    corr.b corr.a corr.theta
-## Hi_NPC_1  47.64973 -16.42042 -2.302585 0.9101083      1  0.1528216
-## Hi_NPC_10 48.87006 -17.58194 -2.302585 0.9772399      1  0.1775833
-## Hi_NPC_14 52.52041 -18.48200 -2.302585 0.5483105      1  0.1815323
-## Hi_NPC_15 51.54416 -18.33884 -2.302585 1.0375941      1  0.1823398
-## Hi_NPC_13 52.11990 -18.40302 -2.302585 0.9479813      1  0.1749775
-## Hi_NPC_12 72.02597 -25.34845 -2.302585 0.4635859      1  0.2412035
+## Hi_NPC_1  47.64966 -16.42038 -2.302585 0.9101081      1  0.1528216
+## Hi_NPC_10 48.86990 -17.58189 -2.302585 0.9772398      1  0.1775832
+## Hi_NPC_14 52.52079 -18.48213 -2.302585 0.5483102      1  0.1815322
+## Hi_NPC_15 51.54410 -18.33882 -2.302585 1.0375941      1  0.1823398
+## Hi_NPC_13 52.14121 -18.41062 -2.302585 0.9479800      1  0.1749764
+## Hi_NPC_12 72.02598 -25.34845 -2.302585 0.4635858      1  0.2412034
 ##           corr.ltheta.b corr.ltheta.t corr.ltheta.m corr.ltheta.s
-## Hi_NPC_1      -8.305691      2.914855      4.075386    -0.5057704
-## Hi_NPC_10     -3.160282      3.288652      4.286077    -0.4124728
-## Hi_NPC_14     -5.555386      3.250469      3.072089    -0.6740517
-## Hi_NPC_15     -1.809298      2.844078      6.034755    -0.3642427
-## Hi_NPC_13     -3.234334      2.591892      3.786538    -1.0339466
-## Hi_NPC_12     -1.507832      3.344728      4.478469    -0.5397455
+## Hi_NPC_1      -8.292418      2.914915      4.076241    -0.5056389
+## Hi_NPC_10     -3.161015      3.288679      4.285866    -0.4124688
+## Hi_NPC_14     -5.555324      3.250466      3.072089    -0.6740574
+## Hi_NPC_15     -1.809352      2.844083      6.034699    -0.3642438
+## Hi_NPC_13     -3.234173      2.591897      3.786496    -1.0339583
+## Hi_NPC_12     -1.507829      3.344729      4.478474    -0.5397445
 ##           corr.ltheta.r  conc.a2
-## Hi_NPC_1      0.1170947 1.468411
-## Hi_NPC_10     0.4049705 1.630775
-## Hi_NPC_14     0.1000000 1.685696
-## Hi_NPC_15     1.4353150 1.681808
-## Hi_NPC_13     0.1000000 1.674445
-## Hi_NPC_12     0.7648221 2.291489
+## Hi_NPC_1      0.1173295 1.468405
+## Hi_NPC_10     0.4048684 1.630770
+## Hi_NPC_14     0.1000000 1.685707
+## Hi_NPC_15     1.4352539 1.681806
+## Hi_NPC_13     0.1000000 1.675119
+## Hi_NPC_12     0.7648265 2.291489
 ```
 
 In the resulting summary table, `corr.a` and `corr.b` are slope and intersept of the correlated component fit, `conc.a` and `conc.b` are to the concomitant or associated fits, `corr.theta` is the NB over-dispersion, and `fail.r` is the background Poisson rate (fixed). We can also take a look at the resulting `cell.model.fits.pdf` file that is outputted to get a sense of how these parameters related to the data. 
 
-![sample cell model fit](figures/cell.model.fits.1.png) 
+![sample cell model fit](figure/cell.model.fits.1.png) 
 
 The full set of error models for all cells has been precomputed for you and can be loaded.
 
 
 ```r
-load('knn.RData')
+load('/groups/pklab/scw2015/jfan/knn.RData')
 ```
 
 Particularly poor cells may result in abnormal fits, most commonly showing negtive `corr.a`, and should be removed.
@@ -294,7 +478,7 @@ In `PAGODA`, variance of the NB/Poisson mixture processes derived from the error
 varinfo <- pagoda.varnorm(knn, counts = cd, trim = 3/ncol(cd), max.adj.var = 5, n.cores = 4, plot = TRUE)
 ```
 
-![plot of chunk varnorm](figures/varnorm-1.png) 
+![plot of chunk varnorm](figure/varnorm-1.png) 
 
 Sequencing depth or gene coverage is typically still a major aspects of variability, as we have seen previously in our PCA analysis. We can control for the gene coverage (estimated as a number of genes with non-zero magnitude per cell) and normalize out that aspect of cell heterogeneity.
 
@@ -305,7 +489,7 @@ varinfo <- pagoda.subtract.aspect(varinfo, colSums(cd[, rownames(knn)]>0))
 
 We assess for overdispersion in gene sets, we can take advantage of pre-defined pathway gene sets such as GO annotations and look for pathways that exhibit statistically significant excess of coordinated variability. Intuitively, if a pathway is differentially perturbed, we expect all genes within said pathway to be upregulated or downregulated in the same group of cells. In `PAGODA`, for each gene set, we tested whether the amount of variance explained by the first principal component significantly exceed the background expectation.
 
-A set of GO terms has been pre-defined for you and can be loaded.
+A set of GO terms has been pre-defined for you and can be loaded. However, the code is provided for you to show how these GO terms were obtained. 
 
 
 ```r
@@ -333,7 +517,7 @@ go.env <- list2env(go.env)
 
 
 ```r
-load('go.env.RData')
+load('/groups/pklab/scw2015/jfan/go.env.RData')
 # pathway overdispersion
 pwpca <- pagoda.pathway.wPCA(varinfo, go.env, n.components = 1, n.cores = 4, n.internal.shuffles = 0)
 ```
@@ -350,7 +534,7 @@ Testing these pre-defined pathways and annotated gene sets may take a few minute
 
 
 ```r
-load('clusters.RData')
+load('/groups/pklab/scw2015/jfan/clusters.RData')
 ```
 
 Taking into consideration both pre-defined pathways and de-novo gene sets, we can see which aspects of heterogeneity are the most overdispersed and base our cell cluster only on the most overdispersed and informative pathways and gene sets. 
@@ -400,24 +584,24 @@ Next, we will combine aspects that show similar patterns (i.e. separate the same
 tamr2 <- pagoda.reduce.redundancy(tamr, distance.threshold = 0.5, plot = TRUE, cell.clustering = hc, labRow = NA, labCol = NA, box = TRUE, margins = c(0.5, 0.5), trim = 0)
 ```
 
-![plot of chunk tamr](figures/tamr-1.png) 
+![plot of chunk tamr2](figure/tamr2-1.png) 
 
 Now we can view the final result as a heatmap where each row here represents a cluster of pathways where the row names are assigned to be the top overdispersed aspect in each cluster.
 
 
 ```r
 # view final result
-pagoda.view.aspects(tamr2, cell.clustering = hc, box = TRUE, labCol = NA, margins = c(0.5, 20), col.cols = sgCol)
+pagoda.view.aspects(tamr2, cell.clustering = hc, box = TRUE, labCol = NA, margins = c(0.5, 20), col.cols = rbind(sgCol))
 ```
 
-![plot of chunk pagoda](figures/pagoda-1.png) 
+![plot of chunk pagoda](figure/pagoda-1.png) 
 
 We can also create an app to interactively browse the results.
 
 
 ```r
-# compile a browsable app, showing top three clusters with the top color bar
-app <- make.pagoda.app(tamr2, tam, varinfo, go.env, pwpca, clpca, col.cols = col.cols, cell.clustering = hc, title = "NPCs")
+# compile a browsable app
+app <- make.pagoda.app(tamr2, tam, varinfo, go.env, pwpca, clpca, col.cols = rbind(sgCol), cell.clustering = hc, title = "NPCs")
 # show app in the browser (port 1468)
 show.app(app, "pollen", browse = TRUE, port = 1468)  
 ```
