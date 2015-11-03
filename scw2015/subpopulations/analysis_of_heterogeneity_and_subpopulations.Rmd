@@ -13,7 +13,7 @@ opts_chunk$set(
     fig.show = 'hold',
     fig.path = 'figure/',
     cache.path = 'cache/',
-    cache = TRUE
+    cache = FALSE 
 )
 ```
 
@@ -31,7 +31,7 @@ A single cell dataset from [Pollen et al.](http://www.nature.com/nbt/journal/v32
 
 ```{r, 'clean'}
 # load and clean data
-load('/groups/pklab/scw/scw2015/subpopulations/data_clean.RData')
+load('/groups/pklab/scw/scw2015/data/data_clean.RData')
 cd[1:5, 1:5]
 
 # filter out low-gene cells (often empty wells)
@@ -123,7 +123,7 @@ write.table(file="cd.cef", x, append=T, col.names=F, row.names=T, quote=F, sep="
 Now we can run BackSPIN by calling Python from within R.
 
 ```{r, 'backspin2'}
-system("/groups/pklab/scw2015/jfan/BackSPIN-1.0/backSPIN.py -i cd.cef -o cd.clustered.cef -f 2000 -v -d 3")
+system("/groups/pklab/scw/scw2015/data/BackSPIN-1.0/backSPIN.py -i cd.cef -o cd.clustered.cef -f 2000 -v -d 3")
 ```
 
 Now we can read the results back into R and visualize. We can note how BackSPIN first splits the red and green groups of cells from the blue and purple cells, and then proceeds to iteratively split within each of the identified groups.
@@ -187,7 +187,7 @@ In the resulting summary table, `corr.a` and `corr.b` are slope and intersept of
 The full set of error models for all cells has been precomputed for you and can be loaded.
 
 ```{r, 'knn'}
-load('/groups/pklab/scw2015/jfan/knn.RData')
+load('/groups/pklab/scw/scw2015/data/knn.RData')
 ```
 
 Particularly poor cells may result in abnormal fits, most commonly showing negtive `corr.a`, and should be removed.
@@ -242,7 +242,7 @@ go.env <- list2env(go.env)
 ```
 
 ```{r, 'GO2', eval=FALSE}
-load('/groups/pklab/scw2015/jfan/go.env.RData')
+load('/groups/pklab/scw/scw2015/data/go.env.RData')
 # pathway overdispersion
 pwpca <- pagoda.pathway.wPCA(varinfo, go.env, n.components = 1, n.cores = 4, n.internal.shuffles = 0)
 ```
@@ -257,7 +257,7 @@ clpca <- pagoda.gene.clusters(varinfo, trim = 7.1/ncol(varinfo$mat), n.clusters 
 Testing these pre-defined pathways and annotated gene sets may take a few minutes. If you are having trouble keeping up, you can load a pre-computed version.
 
 ```{r, 'clusters'}
-load('/groups/pklab/scw2015/jfan/clusters.RData')
+load('/groups/pklab/scw/scw2015/data/clusters.RData')
 ```
 
 Taking into consideration both pre-defined pathways and de-novo gene sets, we can see which aspects of heterogeneity are the most overdispersed and base our cell cluster only on the most overdispersed and informative pathways and gene sets. 
