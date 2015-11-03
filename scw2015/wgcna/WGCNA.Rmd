@@ -46,7 +46,7 @@ WGCNA requires genes be given in the columns
 
 ```{r 'load-data'}
 
-load("/groups/pklab/scw/scw2015/varinfo.RData");
+load("/groups/pklab/scw/scw2015/data/varinfo.RData");
 mydata=varinfo$mat;
 dim(mydata)
 gene.names=names(sort(varinfo$arv,decreasing=T));
