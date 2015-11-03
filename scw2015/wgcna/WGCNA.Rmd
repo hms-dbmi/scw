@@ -13,53 +13,67 @@ WGCNA: Weighted gene co-expression network analysis
 This code has been adapted from the tutorials available at [WGCNA website](http://labs.genetics.ucla.edu/horvath/CoexpressionNetwork/Rpackages/WGCNA/)
 
 Installing required packages:
-WGCNA requires the following packages to be installed, currently
-one of them is only available through bioconductor
+WGCNA requires the following packages to be installed,
+currently one of them is only available through bioconductor
+
 ```{r eval=FALSE}
-setwd("/users/assieh/Desktop")
+
+module load stats/R/3.2.1
 install.packages(c("dynamicTreeCut", "cluster", "flashClust", "Hmisc", "reshape", "foreach", "doParallel") ) 
 source("http://bioconductor.org/biocLite.R") 
 biocLite("impute")
 install.packages("WGCNA")
+
 ```
 
-Loading the libraries needed for this exercise
+
+Loading WGCNA library, and settings to allow parallel execution
+
 
 ```{r messages=FALSE}
+
 library(WGCNA)
 library("flashClust")
-```
-
-Settings to allow parallel execution
-```{r messages=FALSE}
 options(stringsAsFactors = FALSE);
 enableWGCNAThreads()
+
 ```
 
-Loading the data:
+
+Loading the data;
 WGCNA requires genes be given in the columns
 
-```{r}
-load("oed.RData")
-dim(oed)
-gene.names=rownames(oed)
-trans.oed=t(oed)
+
+```{r 'load-data'}
+
+load("/groups/pklab/scw/scw2015/varinfo.RData");
+mydata=varinfo$mat;
+dim(mydata)
+gene.names=names(sort(varinfo$arv,decreasing=T));
+mydata.trans=t(mydata);
+
 ```
 
-For the purpose of this exercise, we focus on a smaller set of genes
 
-```{r}
-n=1000;
-datExpr=trans.oed[,1:n]
-dim(datExpr)
-SubGeneNames=gene.names[1:n]
+For the purpose of this exercise, we focus on a smaller set of genes:
+
+
+```{r 'select-subdata'}
+
+n=500;
+datExpr=mydata.trans[,gene.names[1:n]];
+SubGeneNames=gene.names[1:n];
+
 ```
 
-Choosing a soft threshold: a tradeoff between scale free topology and mean connectivity
 
-```{r}
+Choosing a soft-threshold power: a tradeoff between scale free topology and mean connectivity
+
+
+```{r 'softpower selection'}
+
 powers = c(c(1:10), seq(from = 12, to=20, by=2));
-sft=pickSoftThreshold(datExpr,dataIsExpr = TRUE,powerVector = powers,corFnc = cor,corOptions = list(use = 'p'),networkType = "unsigned")
+sft=pickSoftThreshold(datExpr,dataIsExpr = TRUE,powerVector = powers,corFnc = cor,corOptions = list(use = 'p'),networkType = "signed")
 
 # Plot the results
 sizeGrWindow(9, 5)
@@ -82,15 +96,16 @@ text(sft$fitIndices[,1], sft$fitIndices[,5], labels=powers, cex=cex1,col="red")
 
 Generating adjacency and TOM similarity matrices based on the selected softpower
 
-```{r}
-#Default softPower is 6 for unsigned networks and 12 for signed networks
-softPower = 6;
+
+```{r 'generate-TOM'}
+
+softPower = 8;
 
 #calclute the adjacency matrix
-adj= adjacency(datExpr,type = "unsigned", power = softPower);
+adj= adjacency(datExpr,type = "signed", power = softPower);
 
-#turn adjacency matrix into topological overlap to minimize the effects of noise and spurious associations
-TOM=TOMsimilarityFromExpr(datExpr,networkType = "unsigned", TOMType = "unsigned", power = softPower);
+#turn adjacency matrix into a topological overlap matrix (TOM) to minimize the effects of noise and spurious associations
+TOM=TOMsimilarityFromExpr(datExpr,networkType = "signed", TOMType = "signed", power = softPower);
 colnames(TOM) =rownames(TOM) =SubGeneNames
 dissTOM=1-TOM
 ```
@@ -98,7 +113,9 @@ dissTOM=1-TOM
 
 Module detection
 
-```{r}
+
+```{r 'module-detection'}
+
 #hierarchical clustering of the genes based on the TOM dissimilarity measure
 geneTree = flashClust(as.dist(dissTOM),method="average");
 
@@ -106,9 +123,9 @@ geneTree = flashClust(as.dist(dissTOM),method="average");
 plot(geneTree, xlab="", sub="",cex=0.3);
 
 # Set the minimum module size
-minModuleSize = 30;
+minModuleSize = 20;
 
-# Module identification using a dynamic tree cut algorithm
+# Module identification using dynamic tree cut
 
 dynamicMods = cutreeDynamic(dendro = geneTree,  method="tree", minClusterSize = minModuleSize);
 #dynamicMods = cutreeDynamic(dendro = geneTree, distM = dissTOM, method="hybrid", deepSplit = 2, pamRespectsDendro = FALSE, minClusterSize = minModuleSize);
@@ -121,53 +138,47 @@ dynamicColors = labels2colors(dynamicMods)
 table(dynamicColors)
 plotDendroAndColors(geneTree, dynamicColors, "Dynamic Tree Cut", dendroLabels = FALSE, hang = 0.03, addGuide = TRUE, guideHang = 0.05, main = "Gene dendrogram and module colors")
 
+
 #set the diagonal of the dissimilarity to NA 
 diag(dissTOM) = NA;
 
-#Visualize the Tom plot. You can raise the dissimilarity matrix to a power to bring out the module structure
+#Visualize the Tom plot. Raise the dissimilarity matrix to a power  to bring out the module structure
 sizeGrWindow(7,7)
 TOMplot(dissTOM^4, geneTree, as.character(dynamicColors))
 
-#You can discard the unassigned genes, and focus on the rest
-#restGenes= (dynamicColors != "grey")
-#diss1=1-TOMsimilarityFromExpr(datExpr[,restGenes], power = softPower)
-#colnames(diss1) =rownames(diss1) =SubGeneNames[restGenes]
-#hier1=flashClust(as.dist(diss1), method="average" )
-#plotDendroAndColors(hier1, dynamicColors[restGenes], "Dynamic Tree Cut", dendroLabels = FALSE, hang = 0.03, addGuide = TRUE, guideHang = 0.05, main = "Gene dendrogram and module colors")
-
-#In case the grey module was discarded, we can plot the TOM matrix without it 
-#diag(diss1) = NA;
-
-#Visualize the Tom plot. ou can raise the dissimilarity matrix to a power to bring out the module structure
-#sizeGrWindow(7,7)
-#TOMplot(diss1, hier1, as.character(dynamicColors[restGenes]))
 ```
 
 Extract modules
-```{r}
+
+```{r 'extract-modules'}
+
 module_colors= setdiff(unique(dynamicColors), "grey")
 for (color in module_colors){
     module=SubGeneNames[which(dynamicColors==color)]
     write.table(module, paste("module_",color, ".txt",sep=""), sep="\t", row.names=FALSE, col.names=FALSE,quote=FALSE)
+    
 }
 ```
 
-Look at expression patterns of these genes, as they're clustered
-```{r}
+Look at expression patterns of these genes, as they are clustered
+
+```{r 'expression-pattern'}
+
 module.order <- unlist(tapply(1:ncol(datExpr),as.factor(dynamicColors),I))
 m<-t(t(datExpr[,module.order])/apply(datExpr[,module.order],2,max))
 heatmap(t(m),zlim=c(0,1),col=gray.colors(100),Rowv=NA,Colv=NA,labRow=NA,scale="none",RowSideColors=dynamicColors[module.order])
+
 ```
 
-We can now look at the module gene listings and try to interpret their functions ..
-for instance using http://amigo.geneontology.org/rte
+We can now look at the module gene listings and try to interpret their functions; for instance using http://amigo.geneontology.org/rte
 
-Quantify module similarity by eigengene correlation. Eigengenes: Module representatives
+We can then quantify module similarity by eigengene correlation. Eigengenes: Module representatives
 
-```{r}
-MEList = moduleEigengenes(datExpr, colors = dynamicColors)
-MEs = MEList$eigengenes
-plotEigengeneNetworks(MEs, "", marDendro = c(0,4,1,2), marHeatmap = c(3,4,1,2))
+```{r 'eigengene-plot'}
+
+#MEList = moduleEigengenes(datExpr, colors = dynamicColors)
+#MEs = MEList$eigengenes
+#plotEigengeneNetworks(MEs, "", marDendro = c(0,4,1,2), marHeatmap = c(3,4,1,2))
 
 ```
 
