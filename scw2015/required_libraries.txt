@@ -1,4 +1,19 @@
 # List of required libraries
+XML
+SparseM
+MatrixModels
+lme4
+minqa
+nloptr
+brew
+Lmoments
+distillery
+car
+extRemes
+Rcpp
+RcppArmadillo
+pbkrtest
+pcaMethods (bioconductor)
 sm
 caroline
 scde
