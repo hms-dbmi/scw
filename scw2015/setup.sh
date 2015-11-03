@@ -3,6 +3,7 @@
 domain=$( domainname )
 if [ "$domain"=="Orchestra" ]; then
     module load stats/R/3.2.1-Cairo
+    module load dev/python/2.7.6
     export R_LIBS=/groups/pklab/scw/scw2015/lib
     echo "Using pre-installed R libraries."
 else 
