@@ -16,22 +16,22 @@ Running R on Orchestra
 ========================
 
 In order to run R on Orchestra, we will first connect to an interactive queue, using 6 cores
-```bash
-jh361@mezzanine:~/$ bsub -n 6 -Is -q interactive bash
-Job <7846600> is submitted to queue <interactive>.
-<<Waiting for dispatch ...>>
-<<Starting on clarinet002-072.orchestra>>
+```#bash
+#jh361@mezzanine:~/$ bsub -n 6 -Is -q interactive bash
+#Job <7846600> is submitted to queue <interactive>.
+#<<Waiting for dispatch ...>>
+#<<Starting on clarinet002-072.orchestra>>
 ```
 
 Set up environment variables:
-```bash
-cd scw/scw2015
-source setup.sh
+```#bash
+#cd scw/scw2015
+#source setup.sh
 ```
 
 Run R
-```bash
-R
+```#bash
+#R
 ```
 
 Loading count data
@@ -157,7 +157,7 @@ bar.positions <- barplot(coverage[ord],col=groups[ord],xaxt='n',ylab="Counts per
 axis(side=1,at=c(bar.positions[nES/2],bar.positions[nES+nMEF/2]),labels=c("ESC","MEF"),tick=FALSE)
 ```
 
-![plot of chunk unnamed-chunk-12](/images/figure/unnamed-chunk-12-1.png)
+![plot of chunk unnamed-chunk-12](figure/unnamed-chunk-12-1.png) 
 
 We can see that on average the expression is higher for the MEF cells. We'll filter out those cells with very low coverage
 
