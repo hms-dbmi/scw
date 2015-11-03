@@ -7,7 +7,7 @@ The code and output can be viewed at the accompanying website, http://hms-dbmi.g
 To begin, login to your training accounts on Orchestra
 
 ```{bash}
-ssh -X trainingNN@orchestra.med.harvard
+ssh -X trainingNN@orchestra.med.harvard.edu
 ```
 where `NN` should be replaced by your unique user number, which will be provided to you on the day.
 
