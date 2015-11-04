@@ -202,9 +202,9 @@ Negative binomial model for counts
 ==================================
 
 Perhaps the simplest statistical model for count data is the Poisson, which has only one parameter. Under a Poisson model, the variance of the expression for a particular gene is equal to its mean expression. However, due to a variety of types of noise (both biological and technical), a better fit for read count data is usually obtained by using a *negative binomial* model, for which the variance can be written as:
-$$latex
-\mbox{variance} = \mbox{mean} + \mbox{overdispersion} x \mbox{mean}^2
-$$
+
+variance = mean + overdispersion x mean^2
+
 Since the overdispersion is a positive number, the variance under the negative binomial model is always higher than for the Poisson.
 
 On our dataset, the overdispersion is clearly greater than zero for almost all genes, suggesting that the negative binomial will indeed be a better fit:
