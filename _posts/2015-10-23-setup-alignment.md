@@ -1,4 +1,4 @@
-II---
+---
 layout: default
 title: "Setup, QC and Alignment"
 author: "Radhika Khetani"
