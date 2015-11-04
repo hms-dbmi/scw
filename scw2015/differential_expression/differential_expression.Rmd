@@ -12,32 +12,24 @@ output:
     highlight: zenburn
 ---
 
-Running R on Orchestra
-========================
-
-In order to run R on Orchestra, we will first connect to an interactive queue, using 6 cores
-```#bash
-#jh361@mezzanine:~/$ bsub -n 6 -Is -q interactive bash
-#Job <7846600> is submitted to queue <interactive>.
-#<<Waiting for dispatch ...>>
-#<<Starting on clarinet002-072.orchestra>>
-```
-
-Set up environment variables:
-```#bash
-#cd scw/scw2015
-#source setup.sh
-```
-
-Run R
-```#bash
-#R
-```
 
 Loading count data
 ==================
 
-We will load the counts for the ES/MEF mouse dataset of Islam *et al.*, which contains 48 embyronic stem (ES) cells, and 44 mouse embryonic fibroblast (MEF) cells. We will read in these counts from the table we generated earlier:
+In this section of the tutorial we will be using `R` to analyse count data of the type generated in the previous tutorial. First we will start up an instance of `R`:
+
+```{bash,eval=FALSE}
+R
+```
+
+We can now read in our table of counts using the following command:
+```{r,eval=FALSE}
+counts <- read.delim("~/scw/scw2015/alignment/subset/combined.counts",skip=0,header=T,sep="\t",stringsAsFactors=F,row.names=1)
+```
+Examining the dimensionality of this matrix via the command `dim(counts)`, we can see that there are 23,337 genes detected (rows in the matrix), and 4 cells.
+
+In order to analyse a larger dataset, we will load the counts for the ES/MEF mouse dataset of Islam *et al.*, which contains 48 embyronic stem (ES) cells, and 44 mouse embryonic fibroblast (MEF) cells. For efficiency, this table has been saved as a compressed `.RData` file.
+
 ```{r}
 load("ES_MEF_raw.RData")
 # clean up column (cell) names
@@ -45,7 +37,9 @@ colnames(counts) <- gsub("L139_Sample(\\d+).counts","\\1",colnames(counts))
 colnames(counts)[1:10]
 ```
 
-The rows of the `counts` data frame represent genes, and the columns represent cells. However, the genes in our count file are named according to their Ensembl ID. In order to map these IDs to more informative gene names, we can use the R interface to BioMart. We will not run this procedure during this session, so as to avoid overloading the servers with multiple simultaneous requests, but this is how it might be done:
+The rows of the `counts` data frame represent genes, and the columns represent cells. However, the genes in our count file are named according to their Ensembl ID. In order to map these IDs to more informative gene names, we can use the R interface to BioMart. 
+
+We will *not* run this procedure during this session, so as to avoid overloading the servers with multiple simultaneous requests, but this is how it might be done:
 ```{r,eval=FALSE}
 library(biomaRt)
 mart <- useMart(biomart = 'ensembl', dataset = 'mmusculus_gene_ensembl')
@@ -55,7 +49,7 @@ genes <- list(ids=rownames(counts),names=bm.query[match(rownames(counts), bm.que
 
 Gene identifiers
 ----------------
-Due to time constraints we will simply read in the gene names from a table
+Due to the reasons mentioned above, we will simply read in the map from Ensembl IDs to gene names from a saved table
 ```{r}
 load("gene_name_map.RData")
 ```
@@ -78,7 +72,7 @@ counts <- counts[-which(cell.labels=="EMP")]
 cell.labels <- cell.labels[-which(cell.labels=="EMP")]
 ```
 
-Reorder the cells so that the ES cells (columns) are all in the first half of the matrix:
+We will also reorder the cells so that the ES cells (columns) are all in the first half of the matrix, to help with visualisation later:
 ```{r}
 counts <- cbind(counts[,cell.labels=="ESC"],counts[,cell.labels=="MEF"])
 cell.labels <- substr(colnames(counts),0,3)
@@ -107,7 +101,7 @@ counts <- counts[rowSums(counts)>0,]
 nGenes <- length(counts[,1])
 ```
 
-Let's also save the full cleaned up count matrix for use in subsequent exersize:
+We'll also save the full cleaned up count matrix for use in subsequent analyses:
 ```{r}
 save(counts,file="counts.RData")
 ```
@@ -149,7 +143,9 @@ Negative binomial model for counts
 ==================================
 
 Perhaps the simplest statistical model for count data is the Poisson, which has only one parameter. Under a Poisson model, the variance of the expression for a particular gene is equal to its mean expression. However, due to a variety of types of noise (both biological and technical), a better fit for read count data is usually obtained by using a *negative binomial* model, for which the variance can be written as:
-$$\mbox{variance} = \mbox{mean} + \mbox{overdispersion} x \mbox{mean}^2$$
+$$latex
+\mbox{variance} = \mbox{mean} + \mbox{overdispersion} x \mbox{mean}^2
+$$
 Since the overdispersion is a positive number, the variance under the negative binomial model is always higher than for the Poisson.
 
 On our dataset, the overdispersion is clearly greater than zero for almost all genes, suggesting that the negative binomial will indeed be a better fit:
@@ -173,7 +169,7 @@ Running DESeq
 library(DESeq)
 ```
 
-Several of the steps in the following analyses takes around 5 minutes to run on the full 92-cell dataset, using 6 cores on Orchestra. In order to save time for the purposes of this tutorial session, we will work with a subset of the data, sampling 20 cells from each of the groups:
+Several of the steps in the following analyses takes around 5 minutes to run on the full 92-cell dataset, using 2 cores on Orchestra. In order to save time for the purposes of this tutorial session, we will work with a subset of the data, sampling 20 cells from each of the groups:
 ```{r}
 es.cell.subset <- which(groups=="ESC")[(1:20)*2]
 mef.cell.subset <- which(groups=="MEF")[(1:20)*2]
@@ -230,9 +226,9 @@ de.test.pooled <- nbinomTest(cds.pooled, "ESC", "MEF")
 
 We can then extract the top differentially expressed genes, using a false discovery rate of $0.05$:
 ```{r}
-find.significant.genes <- function(de.test.result,alpha=0.05) {
+find.significant.genes <- function(de.result,alpha=0.05) {
   # filter out significant genes based on FDR adjusted p-values
-  filtered <- de.test.result[(de.test.result$padj < alpha) & !is.infinite(de.test.result$log2FoldChange) & !is.nan(de.test.result$log2FoldChange),]
+  filtered <- de.result[(de.result$padj < alpha) & !is.infinite(de.result$log2FoldChange) & !is.nan(de.result$log2FoldChange),]
   # order by p-value, and print out only the gene name, mean count, and log2 fold change
   sorted <- filtered[order(filtered$pval),c(1,2,6)]
 }
@@ -252,20 +248,6 @@ We can examine the top $15$ of these
 ```{r}
 head(de.genes.pooled,n=15)
 ```
-```{r,echo=FALSE}
-# with small dataset:
-#          id    baseMean log2FoldChange
-#147   Dppa5a   570.83896      -7.387198
-#1       Rpl4 23694.89862      -3.173429
-#5853   Atad5   106.00901     -12.810601
-#1160 Sec61a2   125.58741      -8.512617
-#3        Fn1  2960.04119       4.517258
-#2      Thbs1  3593.56758       5.162643
-#1611 Gm13242    72.16599      -8.830874
-#3872    Ucp2    33.64253     -11.621232
-#34       Lox   763.80992       4.919947
-#1092  Pou5f1    95.50357      -7.071430
-```
 In this case, three genes show an obvious relationship to stem-cell differentiation:
 
 Gene     Function                                                      
@@ -274,29 +256,81 @@ Dppa5a   developmental pluripotency associated
 Pou5f1   self-renewal of undifferentiated ES cells         
 Tdh      mitochondrial; highly expressed in ES cells  
 
+Running DESeq2
+==============
+
+The previous analysis showed you all the different steps involved in carrying out a differential expression analysis with DESeq. The authors of the package recently released an updated version, which includes some modifications to the models, and functions for simplifying the above pipeline.
+
+```{r,message=FALSE,results='hide'}
+library(DESeq2)
+```
+
+With DESeq2, we first create a DESeqDataSet object from the count data, using the group allocation factor object:
+```{r}
+dds <- DESeqDataSetFromMatrix(counts,DataFrame(groups), ~groups)
+```
+
+We'll now allow DESeq2 to use two cores, to speed up the subsequent steps
+```{r}
+library("BiocParallel")
+register(MulticoreParam(2))
+```
+
+We can then carry out differential expression analysis between the two groups. This will automatically carry out the model fitting steps, which may take a few minutes.
+```{r}
+dds <- DESeq(dds,parallel=TRUE)
+res <- results(dds)
+```
+
+As before, we can then extract the top differentially expressed genes, using a false discovery rate of $0.05$. We'll first modify the filter function, since the column names are different for DESeq2 output:
+```{r}
+find.significant.genes <- function(de.result,alpha=0.05) {
+  # filter out significant genes based on FDR adjusted p-values
+  filtered <- de.result[(de.result$padj < alpha) & !is.infinite(de.result$log2FoldChange) & !is.nan(de.result$log2FoldChange) & !is.na(de.result$padj),]
+  # order by p-value, and print out only the gene name, mean count, and log2 fold change
+  sorted <- filtered[order(filtered$padj),c(1,2,6)]
+}
+
+de2.genes <- find.significant.genes(res)
+```
+We can then examine how different the top genes are between DESeq and DESeq2
+```{r}
+intersect(de.genes.pooled[1:20,1],rownames(de2.genes)[1:20])
+```
+
+Although there is some agreement, the disparity here shows that the results of these types of analyses can be sensitive to the model specification, hence it is important to assess whether the results are reproducible using different methods.
+
 Running SCDE
 ============
 
 An alternative approach to modeling the error noise in single cells and testing for differential expression is implemented by the [scde](http://pklab.med.harvard.edu/scde/index.html) package. 
 
-```{r,message=FALSE,results='hide'}
-library(scde)
-```
-
 One of the major sources of technical noise in single-cell RNA seq data are *dropout* events, whereby genes with a non-zero expression are not detected in some cells due to failure to amplify the RNA. 
 
 The package SCDE (Single-Cell Differential Expression) explicitly models this type of event, estimating the probability of a dropout event for each gene, in each cell. The probability of differential expression is then computed after accounting for dropouts.
 
-First we will set the number of cores to the number we selected when opening up the interactive queue:
-```{r}
-n.cores <- 4 
+```{r,message=FALSE,results='hide'}
+library(scde)
 ```
 
-We then fit the SCDE model to the data. Since we fit models separately for each cell in SCDE, we pass in unnormalized counts.
+First we will set the number of cores to the number we selected when opening up the interactive queue:
 ```{r}
-scde.fitted.model <- scde.error.models(counts=counts,groups=groups,n.cores=n.cores,save.model.plots=F)
+n.cores <- 2
 ```
-The fitting process relies on a subset of robust genes that are detected in multiple cross-cell comparisons. Since the `groups` argument is supplied, the error models for the two cell types are fit independently (using two different sets of robust genes). If the `groups` argument is omitted, the models will be fit using a common set.
+
+We then fit the SCDE model to the data. Since we fit models separately for each cell in SCDE, we pass in unnormalized counts. 
+
+The fitting process relies on a subset of robust genes that are detected in multiple cross-cell comparisons. Since the `groups` argument is supplied, the error models for the two cell types are fit independently (using two different sets of robust genes). If the `groups` argument is omitted, the models will be fit using a common set.
+
+For the purposes of this tutorial, we will not run the model fitting step now, since it takes around 10 minutes when only using two cores.
+```{r, eval=FALSE}
+scde.fitted.model <- scde.error.models(counts=counts,groups=groups,n.cores=n.cores,save.model.plots=F)
+save(scde.fitted.model,file="scde_fit.RData")
+```
+Instead we will load a pre-computed fit
+```{r}
+load("/groups/pklab/scw/scw2015/data/scde_fit.RData")
+```
 
 We also need to define a prior distribution for the gene expression magnitude. We will use the default provided by SCDE
 ```{r}
