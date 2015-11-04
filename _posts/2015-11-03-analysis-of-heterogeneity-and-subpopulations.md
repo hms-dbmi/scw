@@ -2,7 +2,6 @@
 layout: default
 title: "Analysis of heterogeneity and subpopulations"
 author: "Jean Fan"
-date: "October 15, 2015"
 output: html_document
 ---
 
@@ -13,18 +12,19 @@ In the last session of the workshop, we learned about the techniques that we can
 # Getting started
 
 Be sure to have the appropriate modules loaded prior to starting analyses. For this workshop, this has already been done for you.
-
 ```
 module load dev/python/2.7.6
 module load stats/R/3.2.1-Cairo
 ```
 
-A single cell dataset from [Pollen et al.](http://www.nature.com/nbt/journal/v32/n10/abs/nbt.2967.html) has been pre-prepared for you. The data is provided as a matrix of gene counts, where each column corresponds to a cell and each row a gene. 
+A single cell dataset from [Pollen et al.](http://www.nature.com/nbt/journal/v32/n10/abs/nbt.2967.html) has been pre-prepared for you. The data is provided as a matrix of gene counts, where each column corresponds to a cell and each row a gene.
+
+*Note on choice of dataset: Depending on how different the subpopulation that you're trying to characterize are, the computational techniques that we are working through today can all work very well. For example, the ES and MEF cells that you all have been working with in the previous sessions are quite different and can be readily separated using very simple techniques. For this workshop, we have a more difficult cell population for illustrative purposes.*
 
 
 ```r
 # load and clean data
-load('/groups/pklab/scw/scw2015/subpopulations/data_clean.RData')
+load('/groups/pklab/scw/scw2015/data/data_clean.RData')
 cd[1:5, 1:5]
 ```
 
@@ -112,26 +112,64 @@ plot(base.pca$x[,1], base.pca$x[,2], col=libCol, pch=16, main='PCA')
 
 ![plot of chunk pca2](figure/pca2-1.png) 
 
+Whenever you are doing computational analysis, it is very important to keep library size, batch effects, and other potential confounders in mind.
+
 # tSNE
 
-tSNE is a non-linear dimensionality reduction method. With tSNE, one group of cells do seem to segregate cleanly from the rest. If we did not have knowledge of the true group labels, we would be inclined to call this outgroup a subpopulation. 
+tSNE is a non-linear dimensionality reduction method. Note that in tSNE, the perplexity parameter is an estimate of the number of effective neighbors. Here, we have 64 cells. A perplexity of 10 is suitable. For larger numbers of cells such as 1000, you will want to increase the perplexity according to approximately 30.
 
 
 ```r
-require(Rtsne)
+library(Rtsne)
 d <- stats::dist(t(mat))
 set.seed(0) # tsne has some stochastic steps (gradient descent) so need to set random 
-tsne_out <- Rtsne(d, is_distance=TRUE, perplexity=10, verbose = FALSE) 
+tsne_out <- Rtsne(d, is_distance=TRUE, perplexity=10, verbose = TRUE) 
+```
+
+```
+## Read the 64 x 64 data matrix successfully!
+## Using no_dims = 2, perplexity = 10.000000, and theta = 0.500000
+## Computing input similarities...
+## Building tree...
+##  - point 0 of 64
+## Done in 0.01 seconds (sparsity = 0.601074)!
+## Learning embedding...
+## Iteration 50: error is 96.356763 (50 iterations in 0.02 seconds)
+## Iteration 100: error is 82.507328 (50 iterations in 0.03 seconds)
+## Iteration 150: error is 85.233905 (50 iterations in 0.02 seconds)
+## Iteration 200: error is 96.164161 (50 iterations in 0.03 seconds)
+## Iteration 250: error is 6.883903 (50 iterations in 0.02 seconds)
+## Iteration 300: error is 3.501659 (50 iterations in 0.03 seconds)
+## Iteration 350: error is 2.404851 (50 iterations in 0.02 seconds)
+## Iteration 400: error is 1.906871 (50 iterations in 0.02 seconds)
+## Iteration 450: error is 1.430011 (50 iterations in 0.01 seconds)
+## Iteration 500: error is 1.299253 (50 iterations in 0.02 seconds)
+## Iteration 550: error is 1.097094 (50 iterations in 0.01 seconds)
+## Iteration 600: error is 0.991801 (50 iterations in 0.02 seconds)
+## Iteration 650: error is 0.907213 (50 iterations in 0.01 seconds)
+## Iteration 700: error is 0.872126 (50 iterations in 0.01 seconds)
+## Iteration 750: error is 0.855026 (50 iterations in 0.02 seconds)
+## Iteration 800: error is 0.849367 (50 iterations in 0.01 seconds)
+## Iteration 850: error is 0.843300 (50 iterations in 0.02 seconds)
+## Iteration 900: error is 0.838391 (50 iterations in 0.01 seconds)
+## Iteration 950: error is 0.838215 (50 iterations in 0.02 seconds)
+## Iteration 999: error is 0.835047 (50 iterations in 0.01 seconds)
+## Fitting performed in 0.36 seconds.
+```
+
+```r
 plot(tsne_out$Y, col=sgCol, pch=16, main='tSNE')
 ```
 
 ![plot of chunk tsne](figure/tsne-1.png) 
 
+With tSNE, one group of cells do seem to segregate cleanly from the rest. If we did not have knowledge of the true group labels, we would be inclined to call this outgroup a subpopulation.
+
 Still, we may be wondering what genes are driving this subpopulation? What genes or pathways characterize this subpopulation? For that, additional analysis is often needed and dimensionality reduction alone does not provide us with such insight. 
 
 # Hierarchical clustering
 
-Standard hierarchical clustering uses genes to identify distinct classes of cells. In combination with a heatmap visualization, genes driving the hierarchical clustering can become readily apparent. However, most genes are not informative and contribute, at best, noise, resulting in an inaccurate clustering of cells.
+Standard hierarchical clustering uses genes to identify distinct classes of cells. In combination with a heatmap visualization, genes driving the hierarchical clustering can become readily apparent. 
 
 
 ```r
@@ -144,6 +182,8 @@ heatmap(mat[vi,], Rowv=NA, Colv=as.dendrogram(hc), ColSideColors = sgCol,  col=c
 ```
 
 ![plot of chunk hclust](figure/hclust-1.png) 
+
+However, most genes are not informative and contribute, at best, noise, resulting in an inaccurate clustering of cells.
 
 # BackSPIN
 
@@ -164,7 +204,7 @@ Now we can run BackSPIN by calling Python from within R.
 
 
 ```r
-system("/groups/pklab/scw2015/jfan/BackSPIN-1.0/backSPIN.py -i cd.cef -o cd.clustered.cef -f 2000 -v -d 3")
+system("/groups/pklab/scw/scw2015/data/BackSPIN-1.0/backSPIN.py -i cd.cef -o cd.clustered.cef -f 2000 -v -d 3")
 ```
 
 Now we can read the results back into R and visualize. We can note how BackSPIN first splits the red and green groups of cells from the blue and purple cells, and then proceeds to iteratively split within each of the identified groups.
@@ -446,7 +486,7 @@ The full set of error models for all cells has been precomputed for you and can 
 
 
 ```r
-load('/groups/pklab/scw2015/jfan/knn.RData')
+load('/groups/pklab/scw/scw2015/data/knn.RData')
 ```
 
 Particularly poor cells may result in abnormal fits, most commonly showing negtive `corr.a`, and should be removed.
@@ -487,6 +527,13 @@ Sequencing depth or gene coverage is typically still a major aspects of variabil
 varinfo <- pagoda.subtract.aspect(varinfo, colSums(cd[, rownames(knn)]>0))
 ```
 
+If you're having trouble keeping up at this point, you can load a pre-computed version of the `varinfo` object:
+
+
+```r
+load('/groups/pklab/scw/scw2015/data/varinfo.RData')
+```
+
 We assess for overdispersion in gene sets, we can take advantage of pre-defined pathway gene sets such as GO annotations and look for pathways that exhibit statistically significant excess of coordinated variability. Intuitively, if a pathway is differentially perturbed, we expect all genes within said pathway to be upregulated or downregulated in the same group of cells. In `PAGODA`, for each gene set, we tested whether the amount of variance explained by the first principal component significantly exceed the background expectation.
 
 A set of GO terms has been pre-defined for you and can be loaded. However, the code is provided for you to show how these GO terms were obtained. 
@@ -517,7 +564,7 @@ go.env <- list2env(go.env)
 
 
 ```r
-load('/groups/pklab/scw2015/jfan/go.env.RData')
+load('/groups/pklab/scw/scw2015/data/go.env.RData')
 # pathway overdispersion
 pwpca <- pagoda.pathway.wPCA(varinfo, go.env, n.components = 1, n.cores = 4, n.internal.shuffles = 0)
 ```
@@ -534,7 +581,7 @@ Testing these pre-defined pathways and annotated gene sets may take a few minute
 
 
 ```r
-load('/groups/pklab/scw2015/jfan/clusters.RData')
+load('/groups/pklab/scw/scw2015/data/clusters.RData')
 ```
 
 Taking into consideration both pre-defined pathways and de-novo gene sets, we can see which aspects of heterogeneity are the most overdispersed and base our cell cluster only on the most overdispersed and informative pathways and gene sets. 
