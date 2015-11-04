@@ -16,10 +16,12 @@ pbkrtest
 pcaMethods (bioconductor)
 sm
 caroline
+RCurl
 scde
-biomaRt
+biomaRt (bioconductor)
 Rtsne
 DESeq
+BiocParallel (bioconductor)
 DESeq2 (bioconductor)
 
 # WGCNA tutorial
