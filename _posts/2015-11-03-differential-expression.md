@@ -17,7 +17,7 @@ Running R on Orchestra
 
 In order to run R on Orchestra, we will first connect to an interactive queue, using 6 cores
 
-```#bash
+```bash
 #jh361@mezzanine:~/$ bsub -n 6 -Is -q interactive bash
 #Job <7846600> is submitted to queue <interactive>.
 #<<Waiting for dispatch ...>>
@@ -26,14 +26,14 @@ In order to run R on Orchestra, we will first connect to an interactive queue, u
 
 Set up environment variables:
 
-```#bash
+```bash
 #cd scw/scw2015
 #source setup.sh
 ```
 
 Run R
 
-```#bash
+```bash
 #R
 ```
 
