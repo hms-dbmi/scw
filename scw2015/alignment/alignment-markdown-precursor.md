@@ -27,6 +27,24 @@ Do that and you're ready to roll. You should see that you are now connected to a
 
 Notice that we used the `-n 2` option to allow two cores to be used for the analysis (in general you can set this to larger numbers if required, but we'll leave it at 2 for today so as to avoid overloading the system). 
 
+#Setup
+
+The first thing we will do is to checkout a copy of the workshop material from Github into your home directories. 
+
+    $ git clone https://github.com/hms-dbmi/scw.git
+    $ cd scw/scw2015
+
+This repository will remain accessible after the workshop, so you can download the code onto your own machines later. 
+
+Next we will run a small setup script to create the correct environment variables
+
+    $ source setup.sh
+
+If you now list the directory contents with the `ls` command, you will see a directory for each of the four tutorials we will be covering this afternoon, containing `R` markdown code that you can use to re-run the analyses later. Today we will interactively go through all the steps outlined in these files.
+
+Since the data files needed for the analyses are fairly large, these are not stored in the repository, and we must copy them over from another directory on Orchestra. 
+
+
 
 #Introduction to the data
 
@@ -62,20 +80,17 @@ We'll be taking this small subset of reads and performing the following steps:
 
 The counts table generated from step 3 will be the starting point for the more interesting downstream functional analyses. We'll use these subsetted ES and MEF files to demonstrate the workflow; then, we'll look at pre-computed counts results on a full set of samples for the functional analyses.
 
-#Setup
+#Copy across data into your own directories
 
-The first thing we will do is copy the small test data over into your home directory.
+We will now copy over the test data over into your alignment directory.
 
-    $ cd
-    $ mkdir workshop
-    $ cd workshop
+    $ cd alignment
     $ cp -r /groups/pklab/scw/scw2015/ES.MEF.data/subset .
 
 These commands mean:
 
 * change directories to your home directory (`cd` without anything following it will always bring you to your home directory)
-* make a directory (`mkdir`) named workshop
-* change into the directory (`cd`) named workshop
+* change into the directory (`cd`) named 'alignment' 
 * copy (`cp`) the folder `/groups/pklab/scw/scw2015/ES.MEF.data/subset` and everything underneath it (using the `-r`) to the current directory (denoted by a period `.`)
 
 
@@ -89,9 +104,9 @@ For RNA-Seq data many common issues can be detected right off the bat just by lo
 
 FastQC is pretty fast, especially on small files, so we can run FastQC on one of the full files (instead of just on the subset). First lets copy one of those files over:
 
-    $ mkdir ~/workshop/fastq
-    $ cp /groups/pklab/scw/scw2015/ES.MEF.data/fastq/L139_ESC_1.fq ~/workshop/fastq/
-    $ cd ~/workshop/fastq
+    $ mkdir ~/scw/scw2015/alignment/fastq
+    $ cp /groups/pklab/scw/scw2015/ES.MEF.data/fastq/L139_ESC_1.fq ~/scw/scw2015/alignment/fastq/
+    $ cd ~/scw/scw2015/alignment/fastq
 Now we can run FastQC on the file by typing:
 
     $ fastqc L139_ESC_1.fq
@@ -160,7 +175,7 @@ We will use this precomputed index of the gene sequences instead of the GTF file
 Now we're ready to align the reads to the mm10 genome. We will align two ESC samples and two MEF samples:
 
 ```
-$ cd ~/workshop/subset
+$ cd ~/scw/scw2015/alignment/subset
     
 $ bsub -J L139_ESC_1 -W 00:20 -n 2 -q training "tophat -p 2 -o L139_ESC_1-tophat --no-coverage-search --transcriptome-index=/groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Annotation/Genes/tophat2_trans/genes /groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Sequence/Bowtie2Index/genome L139_ESC_1.subset.fastq; mv L139_ESC_1-tophat/accepted_hits.bam L139_ESC_1-tophat/L139_ESC_1.bam"
     
