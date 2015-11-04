@@ -226,5 +226,5 @@ This command means *s*team *ed*it (`sed`) the file `combined.featureCounts` by
 
 `s/Geneid/id/` changing the phrase "Geneid" to "id". 
 ***
-This outputs a file in a format with "I" rows of genes and the "J" columns of samples. Each cell is the number of reads that can be uniquely assigned to the gene "i" in the sample "j". This file is of now ready and in the correct format for loading into R.
+This outputs a table with "I" rows of genes and the "J" columns of samples. Each entry in the table is the number of reads that can be uniquely assigned to the gene "i" in the sample "j". This file is of now ready and in the correct format for loading into R.
 
