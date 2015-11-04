@@ -9,6 +9,13 @@ output: html_document
 
 To get on Orchestra you want to connect via ssh, and to turn X11 forwarding on. Turning X11 forwarding will let the Orchestra machines open windows on your local machine, which is useful for looking at the data.
 
+> Note for Mac users: you can use the Terminal application/utility to connect to Orchestra as described below. In addition, you will also need to download and install [XQuartz](http://www.xquartz.org/) for X11 forwarding.
+>
+> &
+> 
+> Note for Windows users: you will need to download and install [Putty](http://www.chiark.greenend.org.uk/~sgtatham/putty/) to connect to Orchestra, and [XMing](http://sourceforge.net/project/downloading.php?group_id=156984&filename=Xming-6-9-0-31-setup.exe) for X11 forwarding. [Follow [these instructions](http://www.geo.mtu.edu/geoschem/docs/putty_install.html).]  
+
+
 Connect to Orchestra using X11 forwarding:
 
     $ ssh -X your_user_name@orchestra.med.harvard.edu
