@@ -27,7 +27,9 @@ module load dev/python/2.7.6
 module load stats/R/3.2.1-Cairo
 ```
 
-A single cell dataset from [Pollen et al.](http://www.nature.com/nbt/journal/v32/n10/abs/nbt.2967.html) has been pre-prepared for you. The data is provided as a matrix of gene counts, where each column corresponds to a cell and each row a gene. 
+A single cell dataset from [Pollen et al.](http://www.nature.com/nbt/journal/v32/n10/abs/nbt.2967.html) has been pre-prepared for you. The data is provided as a matrix of gene counts, where each column corresponds to a cell and each row a gene.
+
+*Note on choice of dataset: Depending on how different the subpopulation that you're trying to characterize are, the computational techniques that we are working through today can all work very well. For example, the ES and MEF cells that you all have been working with in the previous sessions are quite different and can be readily separated using very simple techniques. For this workshop, we have a more difficult cell population for illustrative purposes.*
 
 ```{r, 'clean'}
 # load and clean data
@@ -79,23 +81,27 @@ libCol <- colorRampPalette(c('blue', 'yellow', 'red'))(100)[libSize]
 plot(base.pca$x[,1], base.pca$x[,2], col=libCol, pch=16, main='PCA')
 ```
 
+Whenever you are doing computational analysis, it is very important to keep library size, batch effects, and other potential confounders in mind.
+
 # tSNE
 
-tSNE is a non-linear dimensionality reduction method. With tSNE, one group of cells do seem to segregate cleanly from the rest. If we did not have knowledge of the true group labels, we would be inclined to call this outgroup a subpopulation. 
+tSNE is a non-linear dimensionality reduction method. Note that in tSNE, the perplexity parameter is an estimate of the number of effective neighbors. Here, we have 64 cells. A perplexity of 10 is suitable. For larger numbers of cells such as 1000, you will want to increase the perplexity according to approximately 30.
 
 ```{r, 'tsne', fig.width=5, fig.height=5}
-require(Rtsne)
+library(Rtsne)
 d <- stats::dist(t(mat))
 set.seed(0) # tsne has some stochastic steps (gradient descent) so need to set random 
-tsne_out <- Rtsne(d, is_distance=TRUE, perplexity=10, verbose = FALSE) 
+tsne_out <- Rtsne(d, is_distance=TRUE, perplexity=10, verbose = TRUE) 
 plot(tsne_out$Y, col=sgCol, pch=16, main='tSNE')
 ```
+
+With tSNE, one group of cells do seem to segregate cleanly from the rest. If we did not have knowledge of the true group labels, we would be inclined to call this outgroup a subpopulation.
 
 Still, we may be wondering what genes are driving this subpopulation? What genes or pathways characterize this subpopulation? For that, additional analysis is often needed and dimensionality reduction alone does not provide us with such insight. 
 
 # Hierarchical clustering
 
-Standard hierarchical clustering uses genes to identify distinct classes of cells. In combination with a heatmap visualization, genes driving the hierarchical clustering can become readily apparent. However, most genes are not informative and contribute, at best, noise, resulting in an inaccurate clustering of cells.
+Standard hierarchical clustering uses genes to identify distinct classes of cells. In combination with a heatmap visualization, genes driving the hierarchical clustering can become readily apparent. 
 
 ```{r, 'hclust', fig.width=5, fig.height=5}
 # for the sake of speed, just select top 100 most variable genes
@@ -105,6 +111,8 @@ hc <- hclust(dist(t(mat[vi,])))
 # visualize as heatmap
 heatmap(mat[vi,], Rowv=NA, Colv=as.dendrogram(hc), ColSideColors = sgCol,  col=colorRampPalette(c('blue', 'white', 'red'))(100))
 ```
+
+However, most genes are not informative and contribute, at best, noise, resulting in an inaccurate clustering of cells.
 
 # BackSPIN
 
@@ -212,6 +220,12 @@ Sequencing depth or gene coverage is typically still a major aspects of variabil
 
 ```{r, 'varnorm2'}
 varinfo <- pagoda.subtract.aspect(varinfo, colSums(cd[, rownames(knn)]>0))
+```
+
+If you're having trouble keeping up at this point, you can load a pre-computed version of the `varinfo` object:
+
+```{r, 'varnorm3', eval=FALSE}
+load('/groups/pklab/scw/scw2015/data/varinfo.RData')
 ```
 
 We assess for overdispersion in gene sets, we can take advantage of pre-defined pathway gene sets such as GO annotations and look for pathways that exhibit statistically significant excess of coordinated variability. Intuitively, if a pathway is differentially perturbed, we expect all genes within said pathway to be upregulated or downregulated in the same group of cells. In `PAGODA`, for each gene set, we tested whether the amount of variance explained by the first principal component significantly exceed the background expectation.
