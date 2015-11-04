@@ -9,7 +9,7 @@ output: html_document
 
 To get on Orchestra you want to connect via ssh, and to turn X11 forwarding on. Turning X11 forwarding will let the Orchestra machines open windows on your local machine, which is useful for looking at the data.
 
-> Note for Macs users: If you are using a mac, you can use the Terminal application/utility to connect to Orchestra as described below. In addition, you will also need to download and install [XQuartz](http://www.xquartz.org/) for X11 forwarding.
+> Note for Mac users: If you are using a mac, you can use the Terminal application/utility to connect to Orchestra as described below. In addition, you will also need to download and install [XQuartz](http://www.xquartz.org/) for X11 forwarding.
 >
 > &
 > 
