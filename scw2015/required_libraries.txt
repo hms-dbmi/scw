@@ -20,7 +20,7 @@ scde
 biomaRt
 Rtsne
 DESeq
-DESeq2
+DESeq2 (bioconductor)
 
 # WGCNA tutorial
 dynamicTreeCut
