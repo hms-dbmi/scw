@@ -19,10 +19,14 @@ To get on Orchestra you want to connect via ssh, and to turn X11 forwarding on. 
 Connect to Orchestra using X11 forwarding:
 
     $ ssh -X your_user_name@orchestra.med.harvard.edu
-Orchestra is set up with separate login nodes and compute nodes. You don't want to be doing any work on the login node, as that is set aside for doing non computationally intensive tasks and running code on there will make Orchestra slow for everybody. Here is how to connect to a compute node in interactive mode, meaning you can type commands:
+Orchestra is set up with separate login nodes and compute nodes. You don't want to be doing any work on the login node, as that is set aside for doing non computationally intensive tasks and running code on there will make Orchestra slow for everybody. Here is how to connect to a compute node in interactive mode:
 
-    $ bsub -Is -q interactive bash
+    $ bsub -n 2 -Is -q interactive bash
+
 Do that and you're ready to roll. You should see that you are now connected to a node named by an instrument like `clarinet` or `bassoon`.
+
+Notice that we used the `-n 2` option to allow two cores to be used for the analysis (in general you can set this to larger numbers if required, but we'll leave it at 2 for today so as to avoid overloading the system). 
+
 
 #Introduction to the data
 
