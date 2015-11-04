@@ -36,7 +36,7 @@ The first thing we will do is to checkout a copy of the workshop material from G
 
 This repository will remain accessible after the workshop, so you can download the code onto your own machines later. 
 
-Next we will run a small setup script to create the correct environment variables
+Next we will run a small setup script to create the correct environment variables for running the programs we will need on Orchestra 
 
     $ source setup.sh
 
