@@ -12,6 +12,7 @@ In the last session of the workshop, we learned about the techniques that we can
 # Getting started
 
 Be sure to have the appropriate modules loaded prior to starting analyses. For this workshop, this has already been done for you.
+
 ```
 module load dev/python/2.7.6
 module load stats/R/3.2.1-Cairo
