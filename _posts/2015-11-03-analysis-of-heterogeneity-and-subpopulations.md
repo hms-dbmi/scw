@@ -266,7 +266,7 @@ The fitting process relies on a subset of robust genes that are detected in mult
 
 ```r
 library(scde)
-knn <- knn.error.models(cd[, 1:10], k = ncol(cd)/5, n.cores = 4, min.count.threshold = 2, min.nonfailed = 5, max.model.plots = 5, save.model.plots = TRUE, verbose = 1)  # turn on verbosity
+knn <- knn.error.models(cd[, 1:10], k = ncol(cd)/5, n.cores = 2, min.count.threshold = 2, min.nonfailed = 5, max.model.plots = 5, save.model.plots = TRUE, verbose = 1)  # turn on verbosity
 ```
 
 ```
@@ -516,7 +516,7 @@ In `PAGODA`, variance of the NB/Poisson mixture processes derived from the error
     
 
 ```r
-varinfo <- pagoda.varnorm(knn, counts = cd, trim = 3/ncol(cd), max.adj.var = 5, n.cores = 4, plot = TRUE)
+varinfo <- pagoda.varnorm(knn, counts = cd, trim = 3/ncol(cd), max.adj.var = 5, n.cores = 2, plot = TRUE)
 ```
 
 ![plot of chunk varnorm](figure/varnorm-1.png) 
@@ -567,7 +567,7 @@ go.env <- list2env(go.env)
 ```r
 load('/groups/pklab/scw/scw2015/data/go.env.RData')
 # pathway overdispersion
-pwpca <- pagoda.pathway.wPCA(varinfo, go.env, n.components = 1, n.cores = 4, n.internal.shuffles = 0)
+pwpca <- pagoda.pathway.wPCA(varinfo, go.env, n.components = 1, n.cores = 2, n.internal.shuffles = 0)
 ```
 
 Instead of relying on pre-defined pathways, we can also test on 'de novo' gene sets whose expression profiles are well-correlated within the given dataset.
@@ -575,7 +575,7 @@ Instead of relying on pre-defined pathways, we can also test on 'de novo' gene s
 
 ```r
 # de novo gene sets
-clpca <- pagoda.gene.clusters(varinfo, trim = 7.1/ncol(varinfo$mat), n.clusters = 150, n.cores = 4, plot = FALSE)
+clpca <- pagoda.gene.clusters(varinfo, trim = 7.1/ncol(varinfo$mat), n.clusters = 150, n.cores = 2, plot = FALSE)
 ```
 
 Testing these pre-defined pathways and annotated gene sets may take a few minutes. If you are having trouble keeping up, you can load a pre-computed version.
