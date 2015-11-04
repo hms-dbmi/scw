@@ -16,14 +16,14 @@ output:
 Loading count data
 ==================
 
-In this section of the tutorial we will be using `R` to analyse count data of the type generated in the previous tutorial. First we will start up an instance of `R`:
-
+In this section of the tutorial we will be using R to analyse count data of the type generated in the previous tutorial. First we will change directories and start up an instance of R:
 
 ```bash
-R
+$ cd ~/scw/scw2015/differential_expression
+$ R
 ```
 
-We can now read in our table of counts using the following command:
+We can now read in our table of counts using the following R commands:
 
 ```r
 counts <- read.delim("~/scw/scw2015/alignment/subset/combined.counts",skip=0,header=T,sep="\t",stringsAsFactors=F,row.names=1)
