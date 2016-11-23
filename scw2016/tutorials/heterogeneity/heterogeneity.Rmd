@@ -10,7 +10,7 @@ library(knitr)
 opts_chunk$set(
     warning = FALSE,
     message = FALSE,
-    fig.path = 'figure/',
+    fig.path = 'figure-2016/',
     cache.path = 'cache/',
     cache = TRUE
 )

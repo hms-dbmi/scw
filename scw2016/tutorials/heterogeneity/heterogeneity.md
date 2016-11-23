@@ -81,7 +81,7 @@ method.
     # visualize in 2D the first two principal components and color by cell type
     plot(base.pca$x[,1], base.pca$x[,2], col=sg, pch=16, main='PCA')
 
-![](figure/pca-1.png)<!-- -->
+![](figure-2016/pca-1.png)<!-- -->
 
 tSNE
 ====
@@ -105,30 +105,30 @@ numbers of cells, you may want to increase the perplexity accordingly.
     ## Done in 0.01 seconds (sparsity = 0.243025)!
     ## Learning embedding...
     ## Iteration 50: error is 118.973680 (50 iterations in 0.05 seconds)
-    ## Iteration 100: error is 127.558911 (50 iterations in 0.06 seconds)
-    ## Iteration 150: error is 123.943221 (50 iterations in 0.07 seconds)
-    ## Iteration 200: error is 130.050267 (50 iterations in 0.09 seconds)
-    ## Iteration 250: error is 127.913196 (50 iterations in 0.10 seconds)
-    ## Iteration 300: error is 3.617403 (50 iterations in 0.07 seconds)
+    ## Iteration 100: error is 127.558911 (50 iterations in 0.05 seconds)
+    ## Iteration 150: error is 123.943221 (50 iterations in 0.06 seconds)
+    ## Iteration 200: error is 130.050267 (50 iterations in 0.07 seconds)
+    ## Iteration 250: error is 127.913196 (50 iterations in 0.08 seconds)
+    ## Iteration 300: error is 3.617403 (50 iterations in 0.06 seconds)
     ## Iteration 350: error is 2.286202 (50 iterations in 0.04 seconds)
-    ## Iteration 400: error is 2.190548 (50 iterations in 0.04 seconds)
+    ## Iteration 400: error is 2.190548 (50 iterations in 0.03 seconds)
     ## Iteration 450: error is 2.133582 (50 iterations in 0.04 seconds)
     ## Iteration 500: error is 2.086473 (50 iterations in 0.04 seconds)
     ## Iteration 550: error is 2.060643 (50 iterations in 0.04 seconds)
     ## Iteration 600: error is 2.031325 (50 iterations in 0.04 seconds)
     ## Iteration 650: error is 1.983069 (50 iterations in 0.04 seconds)
-    ## Iteration 700: error is 1.846377 (50 iterations in 0.04 seconds)
-    ## Iteration 750: error is 1.827168 (50 iterations in 0.04 seconds)
-    ## Iteration 800: error is 1.825835 (50 iterations in 0.05 seconds)
-    ## Iteration 850: error is 1.825061 (50 iterations in 0.04 seconds)
-    ## Iteration 900: error is 1.825387 (50 iterations in 0.06 seconds)
-    ## Iteration 950: error is 1.824545 (50 iterations in 0.06 seconds)
-    ## Iteration 1000: error is 1.823723 (50 iterations in 0.06 seconds)
-    ## Fitting performed in 1.07 seconds.
+    ## Iteration 700: error is 1.846377 (50 iterations in 0.05 seconds)
+    ## Iteration 750: error is 1.827168 (50 iterations in 0.05 seconds)
+    ## Iteration 800: error is 1.825835 (50 iterations in 0.04 seconds)
+    ## Iteration 850: error is 1.825061 (50 iterations in 0.07 seconds)
+    ## Iteration 900: error is 1.825387 (50 iterations in 0.04 seconds)
+    ## Iteration 950: error is 1.824545 (50 iterations in 0.04 seconds)
+    ## Iteration 1000: error is 1.823723 (50 iterations in 0.05 seconds)
+    ## Fitting performed in 1.00 seconds.
 
     plot(tsne_out$Y, col=sg, pch=16, main='tSNE')
 
-![](figure/tsne-1.png)<!-- -->
+![](figure-2016/tsne-1.png)<!-- -->
 
 Note with tSNE, your results are stochastic. Change the seed, change
 your results.
@@ -143,31 +143,31 @@ your results.
     ##  - point 0 of 224
     ## Done in 0.01 seconds (sparsity = 0.243025)!
     ## Learning embedding...
-    ## Iteration 50: error is 123.486260 (50 iterations in 0.08 seconds)
+    ## Iteration 50: error is 123.486260 (50 iterations in 0.06 seconds)
     ## Iteration 100: error is 127.644744 (50 iterations in 0.07 seconds)
-    ## Iteration 150: error is 125.135074 (50 iterations in 0.06 seconds)
-    ## Iteration 200: error is 129.868562 (50 iterations in 0.06 seconds)
-    ## Iteration 250: error is 138.279847 (50 iterations in 0.06 seconds)
-    ## Iteration 300: error is 4.395593 (50 iterations in 0.06 seconds)
-    ## Iteration 350: error is 3.569927 (50 iterations in 0.05 seconds)
+    ## Iteration 150: error is 125.135074 (50 iterations in 0.07 seconds)
+    ## Iteration 200: error is 129.868562 (50 iterations in 0.07 seconds)
+    ## Iteration 250: error is 138.279847 (50 iterations in 0.07 seconds)
+    ## Iteration 300: error is 4.395593 (50 iterations in 0.07 seconds)
+    ## Iteration 350: error is 3.569927 (50 iterations in 0.06 seconds)
     ## Iteration 400: error is 2.725121 (50 iterations in 0.05 seconds)
     ## Iteration 450: error is 2.243356 (50 iterations in 0.04 seconds)
     ## Iteration 500: error is 2.204841 (50 iterations in 0.04 seconds)
     ## Iteration 550: error is 2.168027 (50 iterations in 0.04 seconds)
-    ## Iteration 600: error is 2.136227 (50 iterations in 0.06 seconds)
-    ## Iteration 650: error is 2.094058 (50 iterations in 0.06 seconds)
-    ## Iteration 700: error is 2.045998 (50 iterations in 0.05 seconds)
-    ## Iteration 750: error is 2.039275 (50 iterations in 0.06 seconds)
-    ## Iteration 800: error is 2.028664 (50 iterations in 0.06 seconds)
-    ## Iteration 850: error is 2.007481 (50 iterations in 0.05 seconds)
-    ## Iteration 900: error is 1.976311 (50 iterations in 0.05 seconds)
-    ## Iteration 950: error is 1.926869 (50 iterations in 0.05 seconds)
-    ## Iteration 1000: error is 1.835692 (50 iterations in 0.04 seconds)
-    ## Fitting performed in 1.09 seconds.
+    ## Iteration 600: error is 2.136227 (50 iterations in 0.04 seconds)
+    ## Iteration 650: error is 2.094058 (50 iterations in 0.04 seconds)
+    ## Iteration 700: error is 2.045998 (50 iterations in 0.04 seconds)
+    ## Iteration 750: error is 2.039275 (50 iterations in 0.04 seconds)
+    ## Iteration 800: error is 2.028664 (50 iterations in 0.04 seconds)
+    ## Iteration 850: error is 2.007481 (50 iterations in 0.04 seconds)
+    ## Iteration 900: error is 1.976311 (50 iterations in 0.04 seconds)
+    ## Iteration 950: error is 1.926869 (50 iterations in 0.04 seconds)
+    ## Iteration 1000: error is 1.835692 (50 iterations in 0.05 seconds)
+    ## Fitting performed in 1.00 seconds.
 
     plot(tsne_out$Y, col=sg, pch=16, main='tSNE')
 
-![](figure/tsne-2-1.png)<!-- -->
+![](figure-2016/tsne-2-1.png)<!-- -->
 
 Still, we may be wondering what genes and pathways characterize these
 subpopulation? For that, additional analysis is often needed and
@@ -225,7 +225,7 @@ al](http://www.nature.com/nmeth/journal/v11/n7/full/nmeth.2967.html).
     # visualize results for one gene
     scde.test.gene.expression.difference("ATP1A2", knn, cd, prior, groups = sg)
 
-![](figure/scde-2-1.png)<!-- -->
+![](figure-2016/scde-2-1.png)<!-- -->
 
     ##               lb       mle        ub        ce         Z        cZ
     ## ATP1A2 -9.377059 -8.677893 -7.567451 -7.567451 -7.160847 -7.160847
@@ -236,7 +236,7 @@ al](http://www.nature.com/nmeth/journal/v11/n7/full/nmeth.2967.html).
     ediff.sig.down <- rownames(ediff.sig[order(ediff.sig$cZ, decreasing = FALSE), ])[1:10]
     heatmap(mat[c(ediff.sig.up, ediff.sig.down),], Rowv=NA, ColSideColors = rainbow(2)[sg],  col=colorRampPalette(c('blue', 'white', 'red'))(100), scale="none")
 
-![](figure/scde-2-2.png)<!-- -->
+![](figure-2016/scde-2-2.png)<!-- -->
 
 Once we have a set of differentially expressed genes, we may use
 techniques such as gene set enrichment analysis (GSEA) to determine
@@ -373,7 +373,7 @@ of subpopulations.
     # view final result
     pagoda.view.aspects(tamr2, cell.clustering = hc, box = TRUE, labCol = NA, margins = c(0.5, 20), col.cols = rbind(sg), top=10)
 
-![](figure/pagoda-tam-1.png)<!-- -->
+![](figure-2016/pagoda-tam-1.png)<!-- -->
 
 We can create an app to further interactively browse the results. A
 pre-compiled app has been launched for you here:
@@ -412,14 +412,14 @@ RGs, Immature Neurons, and Mature Neurons.
     mat[mat > 1] <- 1
     heatmap(mat[,hc$labels], Colv=as.dendrogram(hc), Rowv=NA, scale="none", col=colorRampPalette(c("blue", "white", "red"))(100), ColSideColors=rainbow(2)[sg])
 
-![](figure/pagoda-marker-1.png)<!-- -->
+![](figure-2016/pagoda-marker-1.png)<!-- -->
 
     # Alternatively, define more refined subpopulations
     sg2 <- as.factor(cutree(hc, k=4))
     names(sg2) <- hc$labels
     heatmap(mat[,hc$labels], Colv=as.dendrogram(hc), Rowv=NA, scale="none", col=colorRampPalette(c("blue", "white", "red"))(100), ColSideColors=rainbow(4)[sg2])
 
-![](figure/pagoda-marker-2.png)<!-- -->
+![](figure-2016/pagoda-marker-2.png)<!-- -->
 
 Pseudo-time trajectory analysis
 ===============================
@@ -456,14 +456,14 @@ this example, we will simply choose genes based on prior knowledge.
     # Plot trajectory with inferred branches
     plot_spanning_tree(data) 
 
-![](figure/monocle-2-1.png)<!-- -->
+![](figure-2016/monocle-2-1.png)<!-- -->
 
     # Compare with previous annotations
     plot_spanning_tree(data, color_by = "type") 
 
-![](figure/monocle-2-2.png)<!-- -->
+![](figure-2016/monocle-2-2.png)<!-- -->
 
     # Compare with PAGODA annotations
     plot_spanning_tree(data, color_by = "pagoda") 
 
-![](figure/monocle-2-3.png)<!-- -->
+![](figure-2016/monocle-2-3.png)<!-- -->
