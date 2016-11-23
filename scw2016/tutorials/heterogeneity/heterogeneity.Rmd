@@ -72,7 +72,7 @@ T-embedded stochastic neighbor embedding (tSNE) is a non-linear dimensionality r
 
 ```{r, 'tsne', fig.width=5, fig.height=5}
 library(Rtsne)
-d <- stats::dist(t(mat))
+d <- dist(t(mat))
 set.seed(0) # tsne has some stochastic steps (gradient descent) so need to set random 
 tsne_out <- Rtsne(d, is_distance=TRUE, perplexity=10, verbose = TRUE) 
 plot(tsne_out$Y, col=sg, pch=16, main='tSNE')
@@ -86,62 +86,29 @@ tsne_out <- Rtsne(d, is_distance=TRUE, perplexity=10, verbose = TRUE)
 plot(tsne_out$Y, col=sg, pch=16, main='tSNE')
 ```
 
-Still, we may be wondering what genes and pathways characterize these subpopulation? For that, additional analysis is often needed and dimensionality reduction alone does not provide us with such insight. 
+In general, the clusters from these tSNE results are not particularly clear-cut. Still, we may be wondering what genes and pathways characterize these subpopulation? For that, additional analysis is often needed and dimensionality reduction alone does not provide us with such insight. 
 
-# Differential expression analysis
+# Pathway and gene set overdispersion analysis
 
-Given the two clusters we identified previously, we can identify differentially expressed genes between the two groups of single cells using `scde`. 
+Alternatively, we may be interested in finer, potentially overlapping/non-binary subpopulations. For example, if we were clustering apples, PCA might separate red apples from green apples, but we may be interested in sweet vs. sour apples, or high fiber apples from low fiber apples. `PAGODA` is a method developed by the Kharchenko lab that enables identification and characterization of subpopulations in a manner that resolves these overlapping aspects of transcriptional heterogeneity. For more information, please refer to the original manuscript by [Fan et al](http://www.nature.com/nmeth/journal/v13/n3/full/nmeth.3734.html). `PAGODA` functions are implemented as part of the `scde` package.
 
-```{r, 'scde'}
+```{r, 'pagoda'}
 library(scde)
 ```
 
-Briefly, `scde` models each cell using a mixture of a negative binomial (NB) distribution (for the amplified/detected transcripts) and low-level Poisson distribution (for the unobserved or background-level signal of genes that failed to amplify or were not detected for other reasons). These models can then be used to identify robustly differentially expressed genes. For more information, please refer to the original manuscript by [Kharchenko et al](http://www.nature.com/nmeth/journal/v11/n7/full/nmeth.2967.html). 
+Each cell is modeled using a mixture of a negative binomial (NB) distribution (for the amplified/detected transcripts) and low-level Poisson distribution (for the unobserved or background-level signal of genes that failed to amplify or were not detected for other reasons). These models can then be used to identify robustly differentially expressed genes. 
 
-```{r, 'knn', eval=FALSE}
+```{r, 'pagoda-knn', eval=FALSE}
 # EVALUATION NOT NEEDED FOR SAKE OF TIME
 knn <- knn.error.models(cd, k = ncol(cd)/4, n.cores = 1, min.count.threshold = 2, min.nonfailed = 5, max.model.plots = 10)
 ```
 
-```{r, 'scde-2', fig.width=5, fig.height=5}
+```{r, 'pagoda-knn2', eval=FALSE}
 # just load from what we precomputed for you
 load('../../data/knn.RData') 
-
-# estimate gene expression prior
-prior <- scde.expression.prior(models = knn, counts = cd, length.out = 400, show.plot = FALSE)
-
-# run differential expression tests on a subset of genes (to save time)
-vi <- c("BCL11B", "CDH6", "CNTNAP2", "GRIK3", "NEUROD6", "RTN1", "RUNX1T1", "SERINC5", "SLC24A2", "STMN2", "AIF1L", "ANP32E", "ARID3C", "ASPM", "ATP1A2", "AURKB", "AXL", "BCAN", "BDH2", "C12orf48")
-ediff <- scde.expression.difference(knn, cd[vi,], prior, groups = sg, n.cores = 1, verbose = 1)
-
-# top upregulated genes (tail would show top downregulated ones)
-head(ediff[order(abs(ediff$Z), decreasing = TRUE), ], )
-
-# visualize results for one gene
-scde.test.gene.expression.difference("ATP1A2", knn, cd, prior, groups = sg)
-
-# heatmap
-ediff.sig <- ediff[abs(ediff$cZ) > 1.96, ]
-ediff.sig.up <- rownames(ediff.sig[order(ediff.sig$cZ, decreasing = TRUE), ])[1:10]
-ediff.sig.down <- rownames(ediff.sig[order(ediff.sig$cZ, decreasing = FALSE), ])[1:10]
-heatmap(mat[c(ediff.sig.up, ediff.sig.down),], Rowv=NA, ColSideColors = rainbow(2)[sg],  col=colorRampPalette(c('blue', 'white', 'red'))(100), scale="none")
 ```
 
-Once we have a set of differentially expressed genes, we may use techniques such as gene set enrichment analysis (GSEA) to determine which pathways are differentially up or down regulated. GSEA is not specific to single cell methods and not included in this session but users are encouraged to check out this [light-weight R implementation with tutorials](https://github.com/JEFworks/liger) on their own time. 
-
-# Pathway and gene set overdispersion analysis
-
-Alternatively, we may be interested in finer, potentially overlapping/non-binary subpopulations. For example, if we were clustering apples, PCA might separate red apples from green apples, but we may be interested in sweet vs. sour apples, or high fiber apples from low fiber apples. `PAGODA` is a method developed by the Kharchenko lab that enables identification and characterization of subpopulations in a manner that resolves these overlapping aspects of transcriptional heterogeneity. For more information, please refer to the original manuscript by [Fan et al](http://www.nature.com/nmeth/journal/v13/n3/full/nmeth.3734.html). 
-
-```{r, 'pagoda', fig.width=5, fig.height=5}
-library(scde)
-
-# again, PAGODA like SCDE relies on error models
-load('../../data/cd.RData') 
-load('../../data/knn.RData') 
-```
-
-`PAGODA` relies on accurate quantification of excess variance or overdispersion in genes and gene sets in order to cluster cells and identify subpopulations. Accurate quantification of this overdispersion means that we must normalize out expected levels of technical and intrinsic biological noise. Intuitively, lowly-expressed genes are often more prone to drop-out and thus may exhibit large variances simply due to such technical noise.
+`PAGODA` relies on accurate quantification of excess variance or overdispersion in genes and gene sets in order to cluster cells and identify subpopulations. Accurate quantification of this overdispersion means that we must normalize out expected levels of technical and intrinsic biological noise. Intuitively, lowly-expressed genes are often more prone to drop-out and thus may exhibit large variances simply due to such technical noise. 
 
 ```{r, 'pagoda-varnorm', eval=FALSE}
 # EVALUATION NOT NEEDED FOR SAKE OF TIME
@@ -212,11 +179,29 @@ tamr2 <- pagoda.reduce.redundancy(tamr, plot = FALSE)
 pagoda.view.aspects(tamr2, cell.clustering = hc, box = TRUE, labCol = NA, margins = c(0.5, 20), col.cols = rbind(sg), top=10)
 ```
 
-We can create an app to further interactively browse the results. A pre-compiled app has been launched for you here: http://pklab.med.harvard.edu/cgi-bin/R/rook/scw.xiaochang/index.html. 
+We can also use a 2D embedding of the cells to aid visualization.
+
+```{r, 'pagoda-tsne', fig.width=8, fig.height=5}
+library(Rtsne)
+# recalculate clustering distance .. we'll need to specify return.details=T
+cell.clustering <- pagoda.cluster.cells(tam, varinfo, include.aspects=TRUE, verbose=TRUE, return.details=T)
+
+# fix the seed to ensure reproducible results
+set.seed(0)
+tSNE.pagoda <- Rtsne(cell.clustering$distance, is_distance=TRUE, perplexity=10)
+
+# plot
+par(mfrow=c(1,1), mar = rep(5,4))
+plot(tSNE.pagoda$Y, col=sg, pch=16, main='PAGODA tSNE')
+```
+
+By incorporating variance normalization and pathway-level information, our tSNE plot looks much more convincing!
+
+We can also create an app to further interactively browse the results. A pre-compiled app has been launched for you here: http://pklab.med.harvard.edu/cgi-bin/R/rook/scw.xiaochang/index.html. 
 
 ```{r, 'pagoda-app', eval=FALSE}
 # compile a browsable app
-app <- make.pagoda.app(tamr2, tam, varinfo, go.env, pwpca, clpca, col.cols = rbind(sg), cell.clustering = hc, title = "Camp")
+app <- make.pagoda.app(tamr2, tam, varinfo, go.env, pwpca, clpca, col.cols = rbind(sg), cell.clustering = hc, title = "Camp", embedding = tSNE.pagoda$Y)
 # show app in the browser (port 1468)
 show.app(app, "Camp", browse = TRUE, port = 1468)  
 ```
@@ -236,18 +221,61 @@ markers <- c(
     "MKI67","TPX2",
     "EOMES", "NEUROD4","HES6"
     )
-# heatmap
-mat <- varinfo$mat[markers,]
-range(mat)
-mat[mat < -1] <- -1
-mat[mat > 1] <- 1
-heatmap(mat[,hc$labels], Colv=as.dendrogram(hc), Rowv=NA, scale="none", col=colorRampPalette(c("blue", "white", "red"))(100), ColSideColors=rainbow(2)[sg])
+# heatmap for subset of gene markers
+mat.sub <- varinfo$mat[markers,]
+range(mat.sub)
+mat.sub[mat.sub < -1] <- -1
+mat.sub[mat.sub > 1] <- 1
+heatmap(mat.sub[,hc$labels], Colv=as.dendrogram(hc), Rowv=NA, scale="none", col=colorRampPalette(c("blue", "white", "red"))(100), ColSideColors=rainbow(2)[sg])
 
 # Alternatively, define more refined subpopulations
 sg2 <- as.factor(cutree(hc, k=4))
 names(sg2) <- hc$labels
-heatmap(mat[,hc$labels], Colv=as.dendrogram(hc), Rowv=NA, scale="none", col=colorRampPalette(c("blue", "white", "red"))(100), ColSideColors=rainbow(4)[sg2])
+heatmap(mat.sub[,hc$labels], Colv=as.dendrogram(hc), Rowv=NA, scale="none", col=colorRampPalette(c("blue", "white", "red"))(100), ColSideColors=rainbow(4)[sg2])
 ```
+
+# Differential expression analysis
+
+To further characterize identified subpopulations, we can identify differentially expressed genes between the two groups of single cells using `scde`. For more information, please refer to the original manuscript by [Kharchenko et al](http://www.nature.com/nmeth/journal/v11/n7/full/nmeth.2967.html). 
+
+First, let's pick which identified subpopulations we want to compare using differential expression analysis. 
+
+```{r, 'scde', fig.width=5, fig.height=5}
+test <- as.character(sg2)
+test[test==2] <- NA; test[test==3] <- NA
+test <- as.factor(test)
+names(test) <- names(sg2)
+heatmap(mat.sub[,hc$labels], Colv=as.dendrogram(hc), Rowv=NA, scale="none", col=colorRampPalette(c("blue", "white", "red"))(100), ColSideColors=rainbow(4)[test])
+```
+
+Now, let's use `scde` to identify differentially expressed genes. 
+
+```{r, 'scde-2', fig.width=5, fig.height=5}
+# SCDE relies on the same error models
+load('../../data/cd.RData')
+load('../../data/knn.RData')
+
+# estimate gene expression prior
+prior <- scde.expression.prior(models = knn, counts = cd, length.out = 400, show.plot = FALSE)
+
+# run differential expression tests on a subset of genes (to save time)
+vi <- c("BCL11B", "CDH6", "CNTNAP2", "GRIK3", "NEUROD6", "RTN1", "RUNX1T1", "SERINC5", "SLC24A2", "STMN2", "AIF1L", "ANP32E", "ARID3C", "ASPM", "ATP1A2", "AURKB", "AXL", "BCAN", "BDH2", "C12orf48")
+ediff <- scde.expression.difference(knn, cd[vi,], prior, groups = test, n.cores = 1, verbose = 1)
+
+# top upregulated genes (tail would show top downregulated ones)
+head(ediff[order(abs(ediff$Z), decreasing = TRUE), ], )
+
+# visualize results for one gene
+#scde.test.gene.expression.difference("NEUROD6", knn, cd, prior, groups = test)
+
+# heatmap
+ediff.sig <- ediff[abs(ediff$cZ) > 1.96, ]
+ediff.sig.up <- rownames(ediff.sig[order(ediff.sig$cZ, decreasing = TRUE), ])[1:10]
+ediff.sig.down <- rownames(ediff.sig[order(ediff.sig$cZ, decreasing = FALSE), ])[1:10]
+heatmap(mat[c(ediff.sig.up, ediff.sig.down), names(na.omit(test))], Rowv=NA, ColSideColors = rainbow(4)[test[names(na.omit(test))]],  col=colorRampPalette(c('blue', 'white', 'red'))(100), scale="none")
+```
+
+Once we have a set of differentially expressed genes, we may use techniques such as gene set enrichment analysis (GSEA) to determine which pathways are differentially up or down regulated. GSEA is not specific to single cell methods and not included in this session but users are encouraged to check out this [light-weight R implementation with tutorials](https://github.com/JEFworks/liger) on their own time. 
 
 # Pseudo-time trajectory analysis
 
