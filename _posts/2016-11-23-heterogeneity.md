@@ -100,7 +100,7 @@ have 224 cells. A perplexity of 10 is suitable. For larger or smaller
 numbers of cells, you may want to increase the perplexity accordingly.
 
     library(Rtsne)
-    d <- stats::dist(t(mat))
+    d <- dist(t(mat))
     set.seed(0) # tsne has some stochastic steps (gradient descent) so need to set random 
     tsne_out <- Rtsne(d, is_distance=TRUE, perplexity=10, verbose = TRUE) 
 
@@ -111,31 +111,31 @@ numbers of cells, you may want to increase the perplexity accordingly.
     ##  - point 0 of 224
     ## Done in 0.01 seconds (sparsity = 0.243025)!
     ## Learning embedding...
-    ## Iteration 50: error is 118.973680 (50 iterations in 0.05 seconds)
-    ## Iteration 100: error is 127.558911 (50 iterations in 0.05 seconds)
-    ## Iteration 150: error is 123.943221 (50 iterations in 0.06 seconds)
-    ## Iteration 200: error is 130.050267 (50 iterations in 0.07 seconds)
+    ## Iteration 50: error is 118.973680 (50 iterations in 0.06 seconds)
+    ## Iteration 100: error is 127.558911 (50 iterations in 0.06 seconds)
+    ## Iteration 150: error is 123.943221 (50 iterations in 0.07 seconds)
+    ## Iteration 200: error is 130.050267 (50 iterations in 0.06 seconds)
     ## Iteration 250: error is 127.913196 (50 iterations in 0.08 seconds)
     ## Iteration 300: error is 3.617403 (50 iterations in 0.06 seconds)
     ## Iteration 350: error is 2.286202 (50 iterations in 0.04 seconds)
-    ## Iteration 400: error is 2.190548 (50 iterations in 0.03 seconds)
-    ## Iteration 450: error is 2.133582 (50 iterations in 0.04 seconds)
+    ## Iteration 400: error is 2.190548 (50 iterations in 0.04 seconds)
+    ## Iteration 450: error is 2.133582 (50 iterations in 0.03 seconds)
     ## Iteration 500: error is 2.086473 (50 iterations in 0.04 seconds)
     ## Iteration 550: error is 2.060643 (50 iterations in 0.04 seconds)
     ## Iteration 600: error is 2.031325 (50 iterations in 0.04 seconds)
     ## Iteration 650: error is 1.983069 (50 iterations in 0.04 seconds)
-    ## Iteration 700: error is 1.846377 (50 iterations in 0.05 seconds)
-    ## Iteration 750: error is 1.827168 (50 iterations in 0.05 seconds)
-    ## Iteration 800: error is 1.825835 (50 iterations in 0.04 seconds)
-    ## Iteration 850: error is 1.825061 (50 iterations in 0.07 seconds)
+    ## Iteration 700: error is 1.846377 (50 iterations in 0.04 seconds)
+    ## Iteration 750: error is 1.827168 (50 iterations in 0.04 seconds)
+    ## Iteration 800: error is 1.825835 (50 iterations in 0.05 seconds)
+    ## Iteration 850: error is 1.825061 (50 iterations in 0.04 seconds)
     ## Iteration 900: error is 1.825387 (50 iterations in 0.04 seconds)
     ## Iteration 950: error is 1.824545 (50 iterations in 0.04 seconds)
-    ## Iteration 1000: error is 1.823723 (50 iterations in 0.05 seconds)
-    ## Fitting performed in 1.00 seconds.
+    ## Iteration 1000: error is 1.823723 (50 iterations in 0.04 seconds)
+    ## Fitting performed in 0.94 seconds.
 
     plot(tsne_out$Y, col=sg, pch=16, main='tSNE')
 
-![](figure-2016/tsne-1.png)<!-- -->
+![](figure-2016/tsne-1.png)
 
 Note with tSNE, your results are stochastic. Change the seed, change
 your results.
@@ -152,14 +152,14 @@ your results.
     ## Learning embedding...
     ## Iteration 50: error is 123.486260 (50 iterations in 0.06 seconds)
     ## Iteration 100: error is 127.644744 (50 iterations in 0.07 seconds)
-    ## Iteration 150: error is 125.135074 (50 iterations in 0.07 seconds)
-    ## Iteration 200: error is 129.868562 (50 iterations in 0.07 seconds)
-    ## Iteration 250: error is 138.279847 (50 iterations in 0.07 seconds)
-    ## Iteration 300: error is 4.395593 (50 iterations in 0.07 seconds)
-    ## Iteration 350: error is 3.569927 (50 iterations in 0.06 seconds)
-    ## Iteration 400: error is 2.725121 (50 iterations in 0.05 seconds)
+    ## Iteration 150: error is 125.135074 (50 iterations in 0.06 seconds)
+    ## Iteration 200: error is 129.868562 (50 iterations in 0.05 seconds)
+    ## Iteration 250: error is 138.279847 (50 iterations in 0.06 seconds)
+    ## Iteration 300: error is 4.395593 (50 iterations in 0.05 seconds)
+    ## Iteration 350: error is 3.569927 (50 iterations in 0.05 seconds)
+    ## Iteration 400: error is 2.725121 (50 iterations in 0.04 seconds)
     ## Iteration 450: error is 2.243356 (50 iterations in 0.04 seconds)
-    ## Iteration 500: error is 2.204841 (50 iterations in 0.04 seconds)
+    ## Iteration 500: error is 2.204841 (50 iterations in 0.03 seconds)
     ## Iteration 550: error is 2.168027 (50 iterations in 0.04 seconds)
     ## Iteration 600: error is 2.136227 (50 iterations in 0.04 seconds)
     ## Iteration 650: error is 2.094058 (50 iterations in 0.04 seconds)
@@ -169,88 +169,18 @@ your results.
     ## Iteration 850: error is 2.007481 (50 iterations in 0.04 seconds)
     ## Iteration 900: error is 1.976311 (50 iterations in 0.04 seconds)
     ## Iteration 950: error is 1.926869 (50 iterations in 0.04 seconds)
-    ## Iteration 1000: error is 1.835692 (50 iterations in 0.05 seconds)
-    ## Fitting performed in 1.00 seconds.
+    ## Iteration 1000: error is 1.835692 (50 iterations in 0.04 seconds)
+    ## Fitting performed in 0.86 seconds.
 
     plot(tsne_out$Y, col=sg, pch=16, main='tSNE')
 
 ![](figure-2016/tsne-2-1.png)
 
-Still, we may be wondering what genes and pathways characterize these
-subpopulation? For that, additional analysis is often needed and
-dimensionality reduction alone does not provide us with such insight.
-
-Differential expression analysis
-================================
-
-Given the two clusters we identified previously, we can identify
-differentially expressed genes between the two groups of single cells
-using `scde`.
-
-    library(scde)
-
-Briefly, `scde` models each cell using a mixture of a negative binomial
-(NB) distribution (for the amplified/detected transcripts) and low-level
-Poisson distribution (for the unobserved or background-level signal of
-genes that failed to amplify or were not detected for other reasons).
-These models can then be used to identify robustly differentially
-expressed genes. For more information, please refer to the original
-manuscript by [Kharchenko et
-al](http://www.nature.com/nmeth/journal/v11/n7/full/nmeth.2967.html).
-
-    # EVALUATION NOT NEEDED FOR SAKE OF TIME
-    knn <- knn.error.models(cd, k = ncol(cd)/4, n.cores = 1, min.count.threshold = 2, min.nonfailed = 5, max.model.plots = 10)
-
-    # just load from what we precomputed for you
-    load('../../data/knn.RData') 
-
-    # estimate gene expression prior
-    prior <- scde.expression.prior(models = knn, counts = cd, length.out = 400, show.plot = FALSE)
-
-    # run differential expression tests on a subset of genes (to save time)
-    vi <- c("BCL11B", "CDH6", "CNTNAP2", "GRIK3", "NEUROD6", "RTN1", "RUNX1T1", "SERINC5", "SLC24A2", "STMN2", "AIF1L", "ANP32E", "ARID3C", "ASPM", "ATP1A2", "AURKB", "AXL", "BCAN", "BDH2", "C12orf48")
-    ediff <- scde.expression.difference(knn, cd[vi,], prior, groups = sg, n.cores = 1, verbose = 1)
-
-    ## comparing groups:
-    ## 
-    ## neuron    npc 
-    ##    165     59 
-    ## calculating difference posterior
-    ## summarizing differences
-
-    # top upregulated genes (tail would show top downregulated ones)
-    head(ediff[order(abs(ediff$Z), decreasing = TRUE), ], )
-
-    ##                 lb       mle        ub        ce         Z        cZ
-    ## ATP1A2   -9.377059 -8.554510 -7.485196 -7.485196 -7.160847 -7.155924
-    ## AXL     -10.035099 -9.500442 -2.837794 -2.837794 -7.160847 -7.155924
-    ## BCAN     -8.019853 -6.991667 -5.511079 -5.511079 -7.160847 -7.155924
-    ## STMN2     2.714412  3.536961  4.400637  2.714412  7.160813  7.155924
-    ## RUNX1T1   2.220882  2.837794  6.210245  2.220882  7.160813  7.155924
-    ## RTN1      2.303137  3.084559  6.169118  2.303137  7.160813  7.155924
-
-    # visualize results for one gene
-    scde.test.gene.expression.difference("ATP1A2", knn, cd, prior, groups = sg)
-
-![](figure-2016/scde-2-1.png)
-
-    ##               lb       mle        ub        ce         Z        cZ
-    ## ATP1A2 -9.377059 -8.677893 -7.567451 -7.567451 -7.160847 -7.160847
-
-    # heatmap
-    ediff.sig <- ediff[abs(ediff$cZ) > 1.96, ]
-    ediff.sig.up <- rownames(ediff.sig[order(ediff.sig$cZ, decreasing = TRUE), ])[1:10]
-    ediff.sig.down <- rownames(ediff.sig[order(ediff.sig$cZ, decreasing = FALSE), ])[1:10]
-    heatmap(mat[c(ediff.sig.up, ediff.sig.down),], Rowv=NA, ColSideColors = rainbow(2)[sg],  col=colorRampPalette(c('blue', 'white', 'red'))(100), scale="none")
-
-![](figure-2016/scde-2-2.png)
-
-Once we have a set of differentially expressed genes, we may use
-techniques such as gene set enrichment analysis (GSEA) to determine
-which pathways are differentially up or down regulated. GSEA is not
-specific to single cell methods and not included in this session but
-users are encouraged to check out this [light-weight R implementation
-with tutorials](https://github.com/JEFworks/liger) on their own time.
+In general, the clusters from these tSNE results are not particularly
+clear-cut. Still, we may be wondering what genes and pathways
+characterize these subpopulation? For that, additional analysis is often
+needed and dimensionality reduction alone does not provide us with such
+insight.
 
 Pathway and gene set overdispersion analysis
 ============================================
@@ -265,11 +195,21 @@ manner that resolves these overlapping aspects of transcriptional
 heterogeneity. For more information, please refer to the original
 manuscript by [Fan et
 al](http://www.nature.com/nmeth/journal/v13/n3/full/nmeth.3734.html).
+`PAGODA` functions are implemented as part of the `scde` package.
 
     library(scde)
 
-    # again, PAGODA like SCDE relies on error models
-    load('../../data/cd.RData') 
+Each cell is modeled using a mixture of a negative binomial (NB)
+distribution (for the amplified/detected transcripts) and low-level
+Poisson distribution (for the unobserved or background-level signal of
+genes that failed to amplify or were not detected for other reasons).
+These models can then be used to identify robustly differentially
+expressed genes.
+
+    # EVALUATION NOT NEEDED FOR SAKE OF TIME
+    knn <- knn.error.models(cd, k = ncol(cd)/4, n.cores = 1, min.count.threshold = 2, min.nonfailed = 5, max.model.plots = 10)
+
+    # just load from what we precomputed for you
     load('../../data/knn.RData') 
 
 `PAGODA` relies on accurate quantification of excess variance or
@@ -382,12 +322,31 @@ of subpopulations.
 
 ![](figure-2016/pagoda-tam-1.png)
 
-We can create an app to further interactively browse the results. A
+We can also use a 2D embedding of the cells to aid visualization.
+
+    library(Rtsne)
+    # recalculate clustering distance .. we'll need to specify return.details=T
+    cell.clustering <- pagoda.cluster.cells(tam, varinfo, include.aspects=TRUE, verbose=TRUE, return.details=T)
+
+    # fix the seed to ensure reproducible results
+    set.seed(0)
+    tSNE.pagoda <- Rtsne(cell.clustering$distance, is_distance=TRUE, perplexity=10)
+
+    # plot
+    par(mfrow=c(1,1), mar = rep(5,4))
+    plot(tSNE.pagoda$Y, col=sg, pch=16, main='PAGODA tSNE')
+
+![](figure-2016/pagoda-tsne-1.png)
+
+By incorporating variance normalization and pathway-level information,
+our tSNE plot looks much more convincing!
+
+We can also create an app to further interactively browse the results. A
 pre-compiled app has been launched for you here:
 <http://pklab.med.harvard.edu/cgi-bin/R/rook/scw.xiaochang/index.html>.
 
     # compile a browsable app
-    app <- make.pagoda.app(tamr2, tam, varinfo, go.env, pwpca, clpca, col.cols = rbind(sg), cell.clustering = hc, title = "Camp")
+    app <- make.pagoda.app(tamr2, tam, varinfo, go.env, pwpca, clpca, col.cols = rbind(sg), cell.clustering = hc, title = "Camp", embedding = tSNE.pagoda$Y)
     # show app in the browser (port 1468)
     show.app(app, "Camp", browse = TRUE, port = 1468)  
 
@@ -409,24 +368,93 @@ RGs, Immature Neurons, and Mature Neurons.
         "MKI67","TPX2",
         "EOMES", "NEUROD4","HES6"
         )
-    # heatmap
-    mat <- varinfo$mat[markers,]
-    range(mat)
+    # heatmap for subset of gene markers
+    mat.sub <- varinfo$mat[markers,]
+    range(mat.sub)
 
     ## [1] -4.346477  3.805928
 
-    mat[mat < -1] <- -1
-    mat[mat > 1] <- 1
-    heatmap(mat[,hc$labels], Colv=as.dendrogram(hc), Rowv=NA, scale="none", col=colorRampPalette(c("blue", "white", "red"))(100), ColSideColors=rainbow(2)[sg])
+    mat.sub[mat.sub < -1] <- -1
+    mat.sub[mat.sub > 1] <- 1
+    heatmap(mat.sub[,hc$labels], Colv=as.dendrogram(hc), Rowv=NA, scale="none", col=colorRampPalette(c("blue", "white", "red"))(100), ColSideColors=rainbow(2)[sg])
 
 ![](figure-2016/pagoda-marker-1.png)
 
     # Alternatively, define more refined subpopulations
     sg2 <- as.factor(cutree(hc, k=4))
     names(sg2) <- hc$labels
-    heatmap(mat[,hc$labels], Colv=as.dendrogram(hc), Rowv=NA, scale="none", col=colorRampPalette(c("blue", "white", "red"))(100), ColSideColors=rainbow(4)[sg2])
+    heatmap(mat.sub[,hc$labels], Colv=as.dendrogram(hc), Rowv=NA, scale="none", col=colorRampPalette(c("blue", "white", "red"))(100), ColSideColors=rainbow(4)[sg2])
 
 ![](figure-2016/pagoda-marker-2.png)
+
+Differential expression analysis
+================================
+
+To further characterize identified subpopulations, we can identify
+differentially expressed genes between the two groups of single cells
+using `scde`. For more information, please refer to the original
+manuscript by [Kharchenko et
+al](http://www.nature.com/nmeth/journal/v11/n7/full/nmeth.2967.html).
+
+First, let's pick which identified subpopulations we want to compare
+using differential expression analysis.
+
+    test <- as.character(sg2)
+    test[test==2] <- NA; test[test==3] <- NA
+    test <- as.factor(test)
+    names(test) <- names(sg2)
+    heatmap(mat.sub[,hc$labels], Colv=as.dendrogram(hc), Rowv=NA, scale="none", col=colorRampPalette(c("blue", "white", "red"))(100), ColSideColors=rainbow(4)[test])
+
+![](figure-2016/scde-1.png)
+
+Now, let's use `scde` to identify differentially expressed genes.
+
+    # SCDE relies on the same error models
+    load('../../data/cd.RData')
+    load('../../data/knn.RData')
+
+    # estimate gene expression prior
+    prior <- scde.expression.prior(models = knn, counts = cd, length.out = 400, show.plot = FALSE)
+
+    # run differential expression tests on a subset of genes (to save time)
+    vi <- c("BCL11B", "CDH6", "CNTNAP2", "GRIK3", "NEUROD6", "RTN1", "RUNX1T1", "SERINC5", "SLC24A2", "STMN2", "AIF1L", "ANP32E", "ARID3C", "ASPM", "ATP1A2", "AURKB", "AXL", "BCAN", "BDH2", "C12orf48")
+    ediff <- scde.expression.difference(knn, cd[vi,], prior, groups = test, n.cores = 1, verbose = 1)
+
+    ## comparing groups:
+    ## 
+    ##  1  4 
+    ## 55 24 
+    ## calculating difference posterior
+    ## summarizing differences
+
+    # top upregulated genes (tail would show top downregulated ones)
+    head(ediff[order(abs(ediff$Z), decreasing = TRUE), ], )
+
+    ##                 lb       mle        ub        ce         Z        cZ
+    ## STMN2     2.303137  3.207941  7.320687  2.303137  7.160408  6.827743
+    ## CDH6      7.567451 10.076226 10.569755  7.567451  7.150820  6.827743
+    ## CNTNAP2   2.385392  3.331324  8.472255  2.385392  7.048047  6.779055
+    ## BCAN     -9.171422 -8.307745 -4.236128 -4.236128 -6.820435 -6.585346
+    ## RUNX1T1   1.932990  2.673284  7.896471  1.932990  6.749579  6.545467
+    ## ATP1A2  -10.117353 -9.294804 -7.649706 -7.649706 -6.580727 -6.399339
+
+    # visualize results for one gene
+    #scde.test.gene.expression.difference("NEUROD6", knn, cd, prior, groups = test)
+
+    # heatmap
+    ediff.sig <- ediff[abs(ediff$cZ) > 1.96, ]
+    ediff.sig.up <- rownames(ediff.sig[order(ediff.sig$cZ, decreasing = TRUE), ])[1:10]
+    ediff.sig.down <- rownames(ediff.sig[order(ediff.sig$cZ, decreasing = FALSE), ])[1:10]
+    heatmap(mat[c(ediff.sig.up, ediff.sig.down), names(na.omit(test))], Rowv=NA, ColSideColors = rainbow(4)[test[names(na.omit(test))]],  col=colorRampPalette(c('blue', 'white', 'red'))(100), scale="none")
+
+![](figure-2016/scde-2-1.png)
+
+Once we have a set of differentially expressed genes, we may use
+techniques such as gene set enrichment analysis (GSEA) to determine
+which pathways are differentially up or down regulated. GSEA is not
+specific to single cell methods and not included in this session but
+users are encouraged to check out this [light-weight R implementation
+with tutorials](https://github.com/JEFworks/liger) on their own time.
 
 Pseudo-time trajectory analysis
 ===============================
