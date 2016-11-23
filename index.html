@@ -3,31 +3,41 @@ layout: default
 title: Home
 ---
 
-<div class="posts">
-  {% for post in paginator.posts %}
-  <article class="post">
-    <h1 class="post-title">
-      <a href="{{ site.baseurl }}{{ post.url }}">
-        {{ post.title }}
-      </a>
-    </h1>
+<h2>Harvard Single Cell Workshop</h2>
 
-    <!-- <time datetime="{{ post.date | date_to_xmlschema }}" class="post-date">{{ post.date | date_to_string }}</time> -->
+<h3>SCW2016</h3>
+<ul>
+    <li>
+	Quality control and alignment | <a href="https://www.edx.org/bio/radhika-khetani">RADHIKA KHETANI</a>
+    </li>
+    <li>
+	<a href="heterogeneity.html">Heterogeneity analysis</a> | <a href="http://jef.works">JEAN FAN</a>
+    </li>
+    <li>
+	Gene correlation network analysis | <a href="http://bcb.dfci.harvard.edu/~gcyuan/people.html">ASSIEH SAADATPOUR</a> 
+    </li>
+</ul>
 
-    {{ post.content }}
-  </article>
-  {% endfor %}
-</div>
+<hr>
 
-<div class="pagination">
-  {% if paginator.next_page %}
-    <a class="pagination-item older" href="{{ paginator.next_page_path | prepend: site.baseurl }}">Older</a>
-  {% else %}
-    <span class="pagination-item older">Older</span>
-  {% endif %}
-  {% if paginator.previous_page %}
-    <a class="pagination-item newer" href="{{ paginator.previous_page_path | prepend: site.baseurl }}">Newer</a>
-  {% else %}
-    <span class="pagination-item newer">Newer</span>
-  {% endif %}
-</div>
+<h3>SCW2015</h3>
+<ul>
+<li>
+    <b><a href="alignment-markdown-precursor.html">Alignment</a></b> | <a href="https://www.edx.org/bio/radhika-khetani">RADHIKA KHETANI</a>
+</li>
+<li>
+    <b><a href="differential-expression.html">Differential Expression</a></b> | <a href="http://jherman.net/">JOSEPH HERMAN</a>
+</li>
+<li>
+    <b><a href="analysis-of-heterogeneity-and-subpopulations.html">Subpopulations</a></b> | <a href="http://jef.works">JEAN FAN</a>
+</li>
+<li>
+    <b><a href="WGCNA.html">Gene correlation network analysis</a></b> | <a href="http://bcb.dfci.harvard.edu/~gcyuan/people.html">ASSIEH SAADATPOUR</a>
+</li>
+</ul>
+
+<hr>
+
+<h3>SCW2014</h3>
+Externally hosted: <a href="http://pklab.med.harvard.edu/scw2014/">http://pklab.med.harvard.edu/scw2014/</a>
+

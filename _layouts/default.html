@@ -11,10 +11,11 @@
         <h3 class="masthead-title">
           <a href="{{ site.baseurl }}/" title="Home">{{ site.title }}</a>
         </h3>
-	<a href="http://hsci.harvard.edu/event/single-cell-genomics-workshops"><img src='http://pklab.med.harvard.edu/scw2014/hscicat.png'></a>
+	<a href="http://hms-dbmi.github.io/scw/"><img src='http://pklab.med.harvard.edu/scw2014/hscicat.png'></a>
       </div>
-
       <hr>
+      
+      <!--
       <h3>Table of Contents</h3>
       <ul style="list-style-type: none; padding:0; margin:0;">
 	{% for post in site.posts %}
@@ -24,11 +25,13 @@
 	{% endfor %}
       </ul>
       <hr>
-
+      -->
+      
       <main>
         {{ content }}
       </main>
       
+      <hr>
       <footer class="footer">
         <small>
           &copy; <time datetime="{{ site.time | date_to_xmlschema }}">{{ site.time | date: '%Y' }}</time>. All rights reserved.
