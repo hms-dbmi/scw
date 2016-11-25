@@ -1,0 +1,68 @@
+# List of required libraries
+XML
+SparseM
+MatrixModels
+lme4
+minqa
+nloptr
+brew
+Lmoments
+distillery
+car
+extRemes
+Rcpp
+RcppArmadillo
+pbkrtest
+pcaMethods (bioconductor)
+sm
+caroline
+RCurl
+scde
+biomaRt (bioconductor)
+Rtsne
+DESeq
+BiocParallel (bioconductor)
+DESeq2 (bioconductor)
+
+# WGCNA tutorial
+dynamicTreeCut
+cluster
+flashClust
+Hmisc
+reshape
+foreach
+doParallel
+impute
+fastcluster
+iterators
+matrixStats
+ggplot2
+digest
+gtable
+plyr
+proto
+reshape2
+scales
+munsell
+colorspace
+acepack
+latticeExtra
+gridExtra
+preprocessCore (bioconductor)
+GO.db (bioconductor)
+AnnotationDbi (bioconductor)
+DBI (bioconductor)
+RSQLite (bioconductor)
+BiocGenerics (bioconductor)
+Biobase (bioconductor)
+S4Vectors (bioconductor)
+IRanges (bioconductor)
+WGCNA
+
+# To generate markdown with knitr
+knitr
+stringi
+magrittr
+evaluate
+formatR
+stringr
