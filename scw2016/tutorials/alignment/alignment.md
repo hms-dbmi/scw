@@ -18,10 +18,17 @@ To get on Orchestra you want to connect via ssh, and to turn X11 forwarding on. 
 
 Connect to Orchestra using X11 forwarding:
 
-    $ ssh -X your_user_name@orchestra.med.harvard.edu
+```bash
+$ ssh -X your_user_name@orchestra.med.harvard.edu
+```
+
 Orchestra is set up with separate login nodes and compute nodes. You don't want to be doing any work on the login node, as that is set aside for doing non computationally intensive tasks and running code on there will make Orchestra slow for everybody. Here is how to connect to a compute node in interactive mode:
 
-    $ bsub -n 2 -Is -q interactive bash
+```bash
+$ bsub -n 2 -Is -q training bash
+```
+
+*Note: if you are using your own account use the `interactive` queue for the above command*
 
 Do that and you're ready to roll. You should see that you are now connected to a worker node named by an instrument like `clarinet` or `bassoon`.
 
@@ -31,15 +38,18 @@ Notice that we used the `-n 2` option to allow two cores to be used for the anal
 
 The first thing we will do is to checkout a copy of the workshop material from Github into your home directories. 
 
-    $ git clone https://github.com/hms-dbmi/scw.git
-    $ cd scw/scw2016
+```bash
+$ git clone https://github.com/hms-dbmi/scw.git
+$ cd scw/scw2016
+```
 
 This repository will remain accessible after the workshop, so you can download the code onto your own machines later. 
 
 Next we will run a small setup script to create the correct environment variables for running the programs we will need on Orchestra 
 
-    $ source setup.sh
-
+```bash
+$ source setup.sh
+```
 If you now list the directory contents with the `ls` command, you will see a directory for each of the four tutorials we will be covering this afternoon, containing `R` markdown code that you can use to re-run the analyses later. Today we will interactively go through all the steps outlined in these files.
 
 Since the data files needed for the analyses are fairly large, these are not stored in the repository, and we must copy them over from another directory on Orchestra. 
@@ -50,7 +60,9 @@ Since the data files needed for the analyses are fairly large, these are not sto
 
 The raw data we will be using for this part of the workshop lives here `/groups/pklab/scw/scw2015/ES.MEF.data/subset`:
 
-    $ ls /groups/pklab/scw/scw2015/ES.MEF.data/subset
+```bash
+$ ls /groups/pklab/scw/scw2015/ES.MEF.data/subset
+```
 
 ***
 > [FASTQ](https://en.wikipedia.org/wiki/FASTQ_format) files are the standard format for sequenced reads, and that is the format you will receive from the sequencing center after they sequence your cDNA libraries.
@@ -84,8 +96,10 @@ The counts table generated from step 3 will be the starting point for the more i
 
 We will now copy over the test data over into your alignment directory.
 
-    $ cd tutorials/alignment
-    $ cp -r /groups/pklab/scw/scw2015/ES.MEF.data/subset .
+```bash
+$ cd tutorials/alignment
+$ cp -r /groups/pklab/scw/scw2015/ES.MEF.data/subset .
+```
 
 These commands mean:
 
@@ -100,20 +114,27 @@ With the start of any data analysis it is important to poke around at your data 
 
 For RNA-Seq data many common issues can be detected right off the bat just by looking at some features of the raw reads. The most commonly used program to look at the raw reads is [FastQC](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/). To run FastQC on the cluster we have to load the necessary module:
 
-	$ module load seq/fastqc/0.11.3
-
+```bash
+$ module load seq/fastqc/0.11.3
+```
 FastQC is pretty fast, especially on small files, so we can run FastQC on one of the full files (instead of just on the subset). First lets copy one of those files over:
 
-    $ mkdir ~/scw/scw2016/tutorials/alignment/fastq
-    $ cp /groups/pklab/scw/scw2015/ES.MEF.data/fastq/L139_ESC_1.fq ~/scw/scw2016/tutorials/alignment/fastq/
-    $ cd ~/scw/scw2016/tutorials/alignment/fastq
+```bash
+$ mkdir ~/scw/scw2016/tutorials/alignment/fastq
+$ cp /groups/pklab/scw/scw2015/ES.MEF.data/fastq/L139_ESC_1.fq ~/scw/scw2016/tutorials/alignment/fastq/
+$ cd ~/scw/scw2016/tutorials/alignment/fastq
+```
+
 Now we can run FastQC on the file by typing:
 
-    $ fastqc L139_ESC_1.fq
+```bash
+$ fastqc L139_ESC_1.fq
+```
 And look at the nice HTML report it generates with Firefox:
 
-    $ firefox L139_ESC_1_fastqc.html
-    
+```bash
+$ firefox L139_ESC_1_fastqc.html
+```    
 Let's analyse some of the plots: 
 
 * The **per base sequence quality** plot shows some major quality problems during sequencing; having degrading quality as you sequence further is normal, but this is a severe drop off. Severe quality drop offs like this are generally due to technical issues with the sequencer, it is possible it ran out or was running low on a reagent. The good news is it doesn't affect all of the reads, the median value still has a PHRED score > 20 (so 1 in 100 probability of an error), and most aligners can take into account the poor quality so this isn't as bad as it looks.
@@ -124,8 +145,9 @@ Let's analyse some of the plots:
 
 What are those sequences? We can search for the reads that have one of those enriched sequences with `grep` (*g*lobally search a *r*egular *e*xpression and *p*rint) which print out every line in a file that matches a search string. grep the L139_ESC_1.fq file like this:
 
-    $ grep ACTTGAA L139_ESC_1.fq
-    
+```bash
+$ grep ACTTGAA L139_ESC_1.fq
+```    
 You should see a lot of sequences that look like this:
 `TTGCTAGATATCAGTTGCCTTCTTTTGTTCAGCTAAGGAACTTGAA`
 
@@ -144,69 +166,101 @@ If we BLAST this sequence to the mouse genome, we come up empty, so it is some k
 
 #Alignment
 
-For aligning RNA-seq reads it is necessary to use an aligner that is splice-aware; reads crossing splice junctions have gaps when aligned to the genome and the aligner has to be able to handle that possibility. There are a wide variety of aligners to choose from that handle spliced reads. Some, like STAR, require a lot of memory and are not useable on a laptop/desktop machine.
+For aligning RNA-seq reads it is necessary to use an aligner that is splice-aware; reads crossing splice junctions have gaps when aligned to the genome and the aligner has to be able to handle that possibility. There are a wide variety of aligners to choose from that handle spliced reads, e.g. STAR, HISAT2. STAR requires a lot of memory whereas HISAT2 is fast and does not require as much memoty.
 
-For this exercise we will use STAR, so let's load the module first. 
+For this exercise we will use HISAT2, so let's load the 2 modules we will need. 
 	
-	$ module load seq/STAR/2.5.2a
+```bash
+$ module load seq/hisat2/2.0.4
+$ module load seq/samtools/1.3
+```
 
-To align reads with STAR you need three things.
+To align reads with HISAT2 you need three things.
 
-1. The genome sequence of the organism you are working with in FASTA format.
-* A gene annotation for your genome in Gene Transfer Format (GTF). For example from UCSC.
+1. The genome sequence of the organism you are working with in FASTA format. You will use this to make an index.
+* The known splice junctions that can be obtained from the gene annotation or GTF file. You can use the GTF file to make a text file fo splice junctions.
 * The FASTQ file of reads you want to align.
 
-First you must make an index of the genome sequence with or without the GTF (gene annotation file); this allows the STAR algorithm to rapidly find regions of the genome where each read might align. These indices are available on this cluster already, so don't type in these commands, but if you need to do it on your own on a different cluster, here is how to do it:
+First you must make an index of the genome sequence; this allows the HISAT2 algorithm to rapidly find regions of the genome where each read might align. In addition, if you are planning to use the known gene annotations as a guide for alignment, you will need to the splice junction text file. Both of these have already been created for use with this workshop, so **don't type in the following commands**:
 
-    # don't type this in
-    $ STAR --runMode genomeGenerate \
-	--genomeDir my_genome_index \
-	--genomeFastaFiles genome.fasta \
-	--sjdbGTFfile genes.gtf 
-
+```bash
+# don't type this in
+$ hisat2-build -p <num_cores> <genome.fa> <prefix_for_index>
+	
+$ hisat2_extract_splice_sites.py <genes.gtf> > <splicesites.txt>
+```
 We will be using precomputed indices for the mm10 genome today:
 
-    /groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Sequence/starIndex/
-    /groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Annotation/Genes/genes.gtf
-
-Now we're ready to align the reads to the mm10 genome. We will align two ESC samples and two MEF samples:
-
+```bash
+/n/scratch2/scw2016/reference_index/mm10_hisat2/
+/n/scratch2/scw2016/reference_index/mm10_hisat2/splicesites.txt
 ```
+
+We will align two ESC samples and two MEF samples:
+
+```bash
 $ cd ~/scw/scw2016/tutorials/alignment/subset
-    
-$ bsub -J L139_ESC_1 -W 00:20 -n 2 -R "rusage[mem=8000]" -q training STAR --runThreadN 2 --genomeDir /groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Sequence/starIndex/ --readFilesIn L139_ESC_2.subset.fastq --outFileNamePrefix L139_ESC_2.subset_ --outSAMtype BAM Unsorted --outSAMattributes Standard
-    
-$ bsub -J L139_ESC_2 -W 00:20 -n 2 -q training tophat -p 2 -o L139_ESC_2-tophat --no-coverage-search --transcriptome-index=/groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Annotation/Genes/tophat2_trans/genes /groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Sequence/Bowtie2Index/genome L139_ESC_2.subset.fastq; mv L139_ESC_2-tophat/accepted_hits.bam L139_ESC_2-tophat/L139_ESC_2.bam
-    
-$ bsub -J L139_MEF_49 -W 00:20 -n 2 -q training tophat -p 2 -o L139_MEF_49-tophat --no-coverage-search --transcriptome-index=/groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Annotation/Genes/tophat2_trans/genes /groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Sequence/Bowtie2Index/genome L139_MEF_49.subset.fastq; mv L139_MEF_49-tophat/accepted_hits.bam L139_MEF_49-tophat/L139_MEF_49.bam
-    
-$ bsub -J L139_MEF_50 -W 00:20 -n 2 -q training tophat -p 2 -o L139_MEF_50-tophat --no-coverage-search --transcriptome-index=/groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Annotation/Genes/tophat2_trans/genes /groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Sequence/Bowtie2Index/genome L139_MEF_50.subset.fastq; mv L139_MEF_50-tophat/accepted_hits.bam L139_MEF_50-tophat/L139_MEF_50.bam
+
+$ bsub -J L139_ESC_1 -W 00:20 -n 3 -o %J.out -e %J.err -q training "hisat2 -p 2 -t -x \
+/n/scratch2/scw2016/reference_index/mm10_hisat2/mm10_hisat -U L139_ESC_1.subset.fastq \
+--known-splicesite-infile /n/scratch2/scw2016/reference_index/mm10_hisat2/splicesites.txt \
+| samtools view -Sbo L139_ESC_1.subset.bam -"
+
+$ bsub -J L139_ESC_2 -W 00:20 -n 3 -o %J.out -e %J.err -q training "hisat2 -p 2 -t -x \
+/n/scratch2/scw2016/reference_index/mm10_hisat2/mm10_hisat -U L139_ESC_2.subset.fastq \
+--known-splicesite-infile /n/scratch2/scw2016/reference_index/mm10_hisat2/splicesites.txt \
+| samtools view -Sbo L139_ESC_2.subset.bam -"
+
+$ bsub -J L139_MEF_50 -W 00:20 -n 3 -o %J.out -e %J.err -q training "hisat2 -p 2 -t -x \
+/n/scratch2/scw2016/reference_index/mm10_hisat2/mm10_hisat -U L139_MEF_50.subset.fastq \
+--known-splicesite-infile /n/scratch2/scw2016/reference_index/mm10_hisat2/splicesites.txt \
+| samtools view -Sbo L139_MEF_50.subset.bam -"
+
+$ bsub -J L139_MEF_49 -W 00:20 -n 3 -o %J.out -e %J.err -q training "hisat2 -p 2 -t -x \
+/n/scratch2/scw2016/reference_index/mm10_hisat2/mm10_hisat -U L139_MEF_49.subset.fastq \
+--known-splicesite-infile /n/scratch2/scw2016/reference_index/mm10_hisat2/splicesites.txt \
+| samtools view -Sbo L139_MEF_49.subset.bam -"
 ```
 
-Each of these should complete in about seven to ten minutes. Since we ran them all in parallel on the cluster, the whole set should take about seven to ten minutes instead of 30 - 40. Full samples would take hours. 
+Each of these should complete in about 2 minutes. Since we ran them all in parallel on the cluster, the whole set should take about 2 to 4 minutes instead of 10 - 15. Full samples would take longer.
+
 ***
 `-J` names the job so you can see what it is when you run bjobs to check the status of the jobs. 
 
 `-W 00:20` tells the scheduler the job should take about 20 minutes. 
 
-`-q training` submits the job to the training queue. [Note: If you are using your own account, please use `-q short` to submit the jobs to the short queue; the training queue can only be used by people using the training accounts.]
+`-q training` submits the job to the training queue. [Note: If you are using your own account, please use `-q short` or `-q priority` to submit the jobs to the short queue; the training queue can only be used by people using the training accounts.]
 
-The syntax of the tophat command is 
-`tophat -p <NUMBER OF THREADS> --no-coverage-search --transcriptome-index=<PATH TO TRASNCRIPTOME INDEX> <PATH TO GENOME INDEX> <PATH TO INPUT FASTQ>`
+`-n 3` requests 3 cores.
 
-At the end we tack on (after the ";") a command to rename (`mv`) the Tophat output filename `accepted_hits.bam` to something more evocative.
+`-o` & `-e` specify where to save the information that is output by the program, standard output and standard error respectively. 
+
+The syntax of the HISAT2 command is:
+
+`hisat2 -p <num_threads> -x <path_to_genome_index> -U <input_fastq_unpaired> --known-splicesite-infile <splicesites.txt> | samtools view -Sbo <name_of_ouput.bam> -`
+
+*Note: HISAT2 outputs alignment results in SAM format as standard output, so we pipe it to `samtools` and convert it to BAM in the same command.*
+
 ***
-This method of submitting one job at a time is fine for a small number of samples, but if you wanted to run a full set of hundreds of cells, doing this manually for every sample is a waste of time and prone to errors. You can run all of these automatically by writing a loop:
+This method of submitting one job at a time is fine for a small number of samples, but if you wanted to run a full set of hundreds of cells, doing this manually for every sample is a waste of time and prone to errors. You can run all of these automatically by writing a `for` loop:
 
-```
+```bash
 # don't type this in, it is here for future reference
-for file in *.fastq; do
+
+module load seq/hisat2/2.0.4
+module load seq/samtools/1.3
+
+for file in *.fastq
+do
     samplename=$(basename $file .fastq)
-    bsub -W 00:20 -n 2 -q short "tophat -p 2 -o $samplename-tophat --no-coverage-search --transcriptome-index=/groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Annotation/Genes/tophat2_trans/genes /groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Sequence/Bowtie2Index/genome $file; mv $samplename-tophat/accepted_hits.bam $samplename-tophat/$samplename.bam"
-    done
+    
+    bsub -J $samplename -W 00:20 -n 8 -o %J.out -e %J.err -q short "hisat2 -p 7 -x genome_index \
+    -U $samplename splicesites.txt | samtools view -Sbo $samplename.bam -"
+    
+done
 ```
 
-This will loop over all of the files with a `.fastq` extension in the current directory and align them with Tophat. We'll skip ahead now to doing some quality control of the alignments and finally counting the reads mapping to each feature.
+This will loop over all of the files with a `.fastq` extension in the current directory and align them with HISAT2. We'll skip ahead now to doing some quality control of the alignments and finally counting the reads mapping to each feature.
 
 # Quality checking the alignments
 
