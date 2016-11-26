@@ -201,23 +201,23 @@ We will align two ESC samples and two MEF samples:
 ```bash
 $ cd ~/scw/scw2016/tutorials/alignment/subset
 
-$ bsub -J L139_ESC_1 -W 00:20 -n 3 -o %J.L139_ESC_1.out -e %J.L139_ESC_1.err -q training "hisat2 -p 2 -t -x \
-/n/scratch2/scw2016/reference_index/mm10_hisat2/mm10_hisat -U L139_ESC_1.subset.fastq \
+$ bsub -J L139_ESC_1 -W 00:20 -n 3 -o %J.L139_ESC_1.out -e %J.L139_ESC_1.err -q training "hisat2 -p 2 \
+-x /n/scratch2/scw2016/reference_index/mm10_hisat2/mm10_hisat -U L139_ESC_1.subset.fastq \
 --known-splicesite-infile /n/scratch2/scw2016/reference_index/mm10_hisat2/splicesites.txt \
 | samtools view -Sbo L139_ESC_1.subset.bam -"
 
-$ bsub -J L139_ESC_2 -W 00:20 -n 3 -o %J.L139_ESC_2.out -e %J.L139_ESC_2.err -q training "hisat2 -p 2 -t -x \
-/n/scratch2/scw2016/reference_index/mm10_hisat2/mm10_hisat -U L139_ESC_2.subset.fastq \
+$ bsub -J L139_ESC_2 -W 00:20 -n 3 -o %J.L139_ESC_2.out -e %J.L139_ESC_2.err -q training "hisat2 -p 2 \
+-x /n/scratch2/scw2016/reference_index/mm10_hisat2/mm10_hisat -U L139_ESC_2.subset.fastq \
 --known-splicesite-infile /n/scratch2/scw2016/reference_index/mm10_hisat2/splicesites.txt \
 | samtools view -Sbo L139_ESC_2.subset.bam -"
 
-$ bsub -J L139_MEF_50 -W 00:20 -n 3 -o %J.L139_MEF_50.out -e %J.L139_MEF_50.err -q training "hisat2 -p 2 -t -x \
-/n/scratch2/scw2016/reference_index/mm10_hisat2/mm10_hisat -U L139_MEF_50.subset.fastq \
+$ bsub -J L139_MEF_50 -W 00:20 -n 3 -o %J.L139_MEF_50.out -e %J.L139_MEF_50.err -q training "hisat2 -p 2 \
+-x /n/scratch2/scw2016/reference_index/mm10_hisat2/mm10_hisat -U L139_MEF_50.subset.fastq \
 --known-splicesite-infile /n/scratch2/scw2016/reference_index/mm10_hisat2/splicesites.txt \
 | samtools view -Sbo L139_MEF_50.subset.bam -"
 
-$ bsub -J L139_MEF_49 -W 00:20 -n 3 -o %J.L139_MEF_49.out -e %J.L139_MEF_49.err -q training "hisat2 -p 2 -t -x \
-/n/scratch2/scw2016/reference_index/mm10_hisat2/mm10_hisat -U L139_MEF_49.subset.fastq \
+$ bsub -J L139_MEF_49 -W 00:20 -n 3 -o %J.L139_MEF_49.out -e %J.L139_MEF_49.err -q training "hisat2 -p 2 \
+-x /n/scratch2/scw2016/reference_index/mm10_hisat2/mm10_hisat -U L139_MEF_49.subset.fastq \
 --known-splicesite-infile /n/scratch2/scw2016/reference_index/mm10_hisat2/splicesites.txt \
 | samtools view -Sbo L139_MEF_49.subset.bam -"
 ```
@@ -237,7 +237,12 @@ Each of these should complete in about 2 minutes. Since we ran them all in paral
 
 The syntax of the HISAT2 command is:
 
-`hisat2 -p <num_threads> -x <path_to_genome_index> -U <input_fastq_unpaired> --known-splicesite-infile <splicesites.txt> | samtools view -Sbo <name_of_ouput.bam> -`
+```bash
+## DO NOT RUN THIS
+
+hisat2 -p <num_threads> -x <path_to_genome_index> -U <input_fastq_unpaired> \
+--known-splicesite-infile <splicesites.txt> | samtools view -Sbo <name_of_ouput.bam> -
+```
 
 *Note: HISAT2 outputs alignment results in SAM format as standard output, so we pipe it to `samtools` and convert it to BAM in the same command.*
 
