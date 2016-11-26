@@ -23,7 +23,7 @@ Orchestra is set up with separate login nodes and compute nodes. You don't want 
 
     $ bsub -n 2 -Is -q interactive bash
 
-Do that and you're ready to roll. You should see that you are now connected to a node named by an instrument like `clarinet` or `bassoon`.
+Do that and you're ready to roll. You should see that you are now connected to a worker node named by an instrument like `clarinet` or `bassoon`.
 
 Notice that we used the `-n 2` option to allow two cores to be used for the analysis (in general you can set this to larger numbers if required, but we'll leave it at 2 for today so as to avoid overloading the system). 
 
@@ -32,7 +32,7 @@ Notice that we used the `-n 2` option to allow two cores to be used for the anal
 The first thing we will do is to checkout a copy of the workshop material from Github into your home directories. 
 
     $ git clone https://github.com/hms-dbmi/scw.git
-    $ cd scw/scw2015
+    $ cd scw/scw2016
 
 This repository will remain accessible after the workshop, so you can download the code onto your own machines later. 
 
@@ -84,7 +84,7 @@ The counts table generated from step 3 will be the starting point for the more i
 
 We will now copy over the test data over into your alignment directory.
 
-    $ cd alignment
+    $ cd tutorials/alignment
     $ cp -r /groups/pklab/scw/scw2015/ES.MEF.data/subset .
 
 These commands mean:
@@ -104,9 +104,9 @@ For RNA-Seq data many common issues can be detected right off the bat just by lo
 
 FastQC is pretty fast, especially on small files, so we can run FastQC on one of the full files (instead of just on the subset). First lets copy one of those files over:
 
-    $ mkdir ~/scw/scw2015/alignment/fastq
-    $ cp /groups/pklab/scw/scw2015/ES.MEF.data/fastq/L139_ESC_1.fq ~/scw/scw2015/alignment/fastq/
-    $ cd ~/scw/scw2015/alignment/fastq
+    $ mkdir ~/scw/scw2016/tutorials/alignment/fastq
+    $ cp /groups/pklab/scw/scw2015/ES.MEF.data/fastq/L139_ESC_1.fq ~/scw/scw2016/tutorials/alignment/fastq/
+    $ cd ~/scw/scw2016/tutorials/alignment/fastq
 Now we can run FastQC on the file by typing:
 
     $ fastqc L139_ESC_1.fq
@@ -144,46 +144,43 @@ If we BLAST this sequence to the mouse genome, we come up empty, so it is some k
 
 #Alignment
 
-For aligning RNA-seq reads it is necessary to use an aligner that is splice-aware; reads crossing splice junctions have gaps when aligned to the genome and the aligner has to be able to handle that possibility. There are a wide variety of aligners to choose from that handle spliced reads but the two most commonly used are [Tophat](http://ccb.jhu.edu/software/tophat/index.shtml) and [STAR](https://code.google.com/p/rna-star/). They both have similar accuracy, but STAR is much, much faster than Tophat at the cost of using much more RAM; to align to the human genome you need ~40 GB of RAM, so it isn't something you will be able to run on your laptop or another type of RAM-restricted computing environment. 
+For aligning RNA-seq reads it is necessary to use an aligner that is splice-aware; reads crossing splice junctions have gaps when aligned to the genome and the aligner has to be able to handle that possibility. There are a wide variety of aligners to choose from that handle spliced reads. Some, like STAR, require a lot of memory and are not useable on a laptop/desktop machine.
 
-For this exercise we will use Tophat, so let's load the module first. 
+For this exercise we will use STAR, so let's load the module first. 
 	
-	$ module load seq/tophat/2.1.0
+	$ module load seq/STAR/2.5.2a
 
-To align reads with Tophat you need three things.
+To align reads with STAR you need three things.
 
 1. The genome sequence of the organism you are working with in FASTA format.
 * A gene annotation for your genome in Gene Transfer Format (GTF). For example from UCSC.
 * The FASTQ file of reads you want to align.
 
-First you must make an [Bowtie2](http://bowtie-bio.sourceforge.net/bowtie2/index.shtml) index of the genome sequence; this allows the Tophat algorithm to quickly find regions of the genome where each read might align. We have done this step already, so don't type in these commands, but if you need to do it on your own, here is how to do it:
+First you must make an index of the genome sequence with or without the GTF (gene annotation file); this allows the STAR algorithm to rapidly find regions of the genome where each read might align. These indices are available on this cluster already, so don't type in these commands, but if you need to do it on your own on a different cluster, here is how to do it:
 
     # don't type this in
-    $ bowtie2-build your_fasta_file genome_name
+    $ STAR --runMode genomeGenerate \
+	--genomeDir my_genome_index \
+	--genomeFastaFiles genome.fasta \
+	--sjdbGTFfile genes.gtf 
 
 We will be using precomputed indices for the mm10 genome today:
 
-    /groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Sequence/Bowtie2Index/
+    /groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Sequence/starIndex/
     /groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Annotation/Genes/genes.gtf
-
-Finally, we've precomputed an index of the gene sequences from the ref-transcripts.gtf file here:
-
-     /groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Annotation/Genes/tophat2_trans/
-     
-We will use this precomputed index of the gene sequences instead of the GTF file because it is much faster; you can use either and they have the same output.
 
 Now we're ready to align the reads to the mm10 genome. We will align two ESC samples and two MEF samples:
 
 ```
-$ cd ~/scw/scw2015/alignment/subset
+$ cd ~/scw/scw2016/tutorials/alignment/subset
     
-$ bsub -J L139_ESC_1 -W 00:20 -n 2 -q training "tophat -p 2 -o L139_ESC_1-tophat --no-coverage-search --transcriptome-index=/groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Annotation/Genes/tophat2_trans/genes /groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Sequence/Bowtie2Index/genome L139_ESC_1.subset.fastq; mv L139_ESC_1-tophat/accepted_hits.bam L139_ESC_1-tophat/L139_ESC_1.bam"
+$ bsub -J L139_ESC_1 -W 00:20 -n 2 -q training STAR --runThreadN 2 --genomeDir /groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Sequence/starIndex/ --readFilesIn L139_ESC_2.subset.fastq --outFileNamePrefix L139_ESC_2.subset_ --outSAMtype BAM Unsorted --outSAMattributes Standard
     
-$ bsub -J L139_ESC_2 -W 00:20 -n 2 -q training "tophat -p 2 -o L139_ESC_2-tophat --no-coverage-search --transcriptome-index=/groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Annotation/Genes/tophat2_trans/genes /groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Sequence/Bowtie2Index/genome L139_ESC_2.subset.fastq; mv L139_ESC_2-tophat/accepted_hits.bam L139_ESC_2-tophat/L139_ESC_2.bam"
+$ bsub -J L139_ESC_2 -W 00:20 -n 2 -q training tophat -p 2 -o L139_ESC_2-tophat --no-coverage-search --transcriptome-index=/groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Annotation/Genes/tophat2_trans/genes /groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Sequence/Bowtie2Index/genome L139_ESC_2.subset.fastq; mv L139_ESC_2-tophat/accepted_hits.bam L139_ESC_2-tophat/L139_ESC_2.bam
     
-$ bsub -J L139_MEF_49 -W 00:20 -n 2 -q training "tophat -p 2 -o L139_MEF_49-tophat --no-coverage-search --transcriptome-index=/groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Annotation/Genes/tophat2_trans/genes /groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Sequence/Bowtie2Index/genome L139_MEF_49.subset.fastq; mv L139_MEF_49-tophat/accepted_hits.bam L139_MEF_49-tophat/L139_MEF_49.bam"
+$ bsub -J L139_MEF_49 -W 00:20 -n 2 -q training tophat -p 2 -o L139_MEF_49-tophat --no-coverage-search --transcriptome-index=/groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Annotation/Genes/tophat2_trans/genes /groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Sequence/Bowtie2Index/genome L139_MEF_49.subset.fastq; mv L139_MEF_49-tophat/accepted_hits.bam L139_MEF_49-tophat/L139_MEF_49.bam
     
-$ bsub -J L139_MEF_50 -W 00:20 -n 2 -q training "tophat -p 2 -o L139_MEF_50-tophat --no-coverage-search --transcriptome-index=/groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Annotation/Genes/tophat2_trans/genes /groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Sequence/Bowtie2Index/genome L139_MEF_50.subset.fastq; mv L139_MEF_50-tophat/accepted_hits.bam L139_MEF_50-tophat/L139_MEF_50.bam"
+$ bsub -J L139_MEF_50 -W 00:20 -n 2 -q training tophat -p 2 -o L139_MEF_50-tophat --no-coverage-search --transcriptome-index=/groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Annotation/Genes/tophat2_trans/genes /groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Sequence/Bowtie2Index/genome L139_MEF_50.subset.fastq; mv L139_MEF_50-tophat/accepted_hits.bam L139_MEF_50-tophat/L139_MEF_50.bam
 ```
 
 Each of these should complete in about seven to ten minutes. Since we ran them all in parallel on the cluster, the whole set should take about seven to ten minutes instead of 30 - 40. Full samples would take hours. 
