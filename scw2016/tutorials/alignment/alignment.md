@@ -201,22 +201,22 @@ We will align two ESC samples and two MEF samples:
 ```bash
 $ cd ~/scw/scw2016/tutorials/alignment/subset
 
-$ bsub -J L139_ESC_1 -W 00:20 -n 3 -o %J.out -e %J.err -q training "hisat2 -p 2 -t -x \
+$ bsub -J L139_ESC_1 -W 00:20 -n 3 -o %J.L139_ESC_1.out -e %J.L139_ESC_1.err -q training "hisat2 -p 2 -t -x \
 /n/scratch2/scw2016/reference_index/mm10_hisat2/mm10_hisat -U L139_ESC_1.subset.fastq \
 --known-splicesite-infile /n/scratch2/scw2016/reference_index/mm10_hisat2/splicesites.txt \
 | samtools view -Sbo L139_ESC_1.subset.bam -"
 
-$ bsub -J L139_ESC_2 -W 00:20 -n 3 -o %J.out -e %J.err -q training "hisat2 -p 2 -t -x \
+$ bsub -J L139_ESC_2 -W 00:20 -n 3 -o %J.L139_ESC_2.out -e %J.L139_ESC_2.err -q training "hisat2 -p 2 -t -x \
 /n/scratch2/scw2016/reference_index/mm10_hisat2/mm10_hisat -U L139_ESC_2.subset.fastq \
 --known-splicesite-infile /n/scratch2/scw2016/reference_index/mm10_hisat2/splicesites.txt \
 | samtools view -Sbo L139_ESC_2.subset.bam -"
 
-$ bsub -J L139_MEF_50 -W 00:20 -n 3 -o %J.out -e %J.err -q training "hisat2 -p 2 -t -x \
+$ bsub -J L139_MEF_50 -W 00:20 -n 3 -o %J.L139_MEF_50.out -e %J.L139_MEF_50.err -q training "hisat2 -p 2 -t -x \
 /n/scratch2/scw2016/reference_index/mm10_hisat2/mm10_hisat -U L139_MEF_50.subset.fastq \
 --known-splicesite-infile /n/scratch2/scw2016/reference_index/mm10_hisat2/splicesites.txt \
 | samtools view -Sbo L139_MEF_50.subset.bam -"
 
-$ bsub -J L139_MEF_49 -W 00:20 -n 3 -o %J.out -e %J.err -q training "hisat2 -p 2 -t -x \
+$ bsub -J L139_MEF_49 -W 00:20 -n 3 -o %J.L139_MEF_49.out -e %J.L139_MEF_49.err -q training "hisat2 -p 2 -t -x \
 /n/scratch2/scw2016/reference_index/mm10_hisat2/mm10_hisat -U L139_MEF_49.subset.fastq \
 --known-splicesite-infile /n/scratch2/scw2016/reference_index/mm10_hisat2/splicesites.txt \
 | samtools view -Sbo L139_MEF_49.subset.bam -"
@@ -254,7 +254,7 @@ for file in *.fastq
 do
     samplename=$(basename $file .fastq)
     
-    bsub -J $samplename -W 00:20 -n 8 -o %J.out -e %J.err -q short "hisat2 -p 7 -x genome_index \
+    bsub -J $samplename -W 00:20 -n 8 -o %J.$samplename.out -e %J.$samplename.err -q short "hisat2 -p 7 -x genome_index \
     -U $samplename splicesites.txt | samtools view -Sbo $samplename.bam -"
     
 done
@@ -270,10 +270,10 @@ There are several tools to spot check the alignments, it is common to run [RNA-S
 
 The last step is to count the number of reads mapping to the features are are interested in. Quantification can be done at multiple levels; from the level of counting the number of reads supporting a specific splicing event, to the number of reads aligning to an isoform of a gene or the total reads mapping to a known gene. We'll be quantifying the latter, i.e. the total number of reads that can uniquely be assigned to a known gene; basically looking at the location of read alignment on the genome and putting it together with the location of the gene on the genome (this information is contained in the [GTF](http://mblab.wustl.edu/GTF2.html)/annotation file). There are several tools to do this, we will use [featureCounts](http://bioinf.wehi.edu.au/featureCounts/) because it is very fast and accurate.
 
-```
+```bash
 $ module load seq/subread/1.4.6-p3			#featureCounts is part of the subread package
     
-$ featureCounts --primary -a /groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Annotation/Genes/genes.gtf -o combined.featureCounts L139_ESC_1-tophat/L139_ESC_1.bam L139_ESC_2-tophat/L139_ESC_2.bam L139_MEF_49-tophat/L139_MEF_49.bam L139_MEF_50-tophat/L139_MEF_50.bam
+$ featureCounts --primary -a /groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Annotation/Genes/genes.gtf -o combined.featureCounts *.bam
 ```    
     
 ***
@@ -292,5 +292,5 @@ This command means *s*team *ed*it (`sed`) the file `combined.featureCounts` by
 
 `s/Geneid/id/` changing the phrase "Geneid" to "id". 
 ***
-This outputs a table with "I" rows of genes and the "J" columns of samples. Each entry in the table is the number of reads that can be uniquely assigned to the gene "i" in the sample "j". This file is of now ready and in the correct format for loading into R.
+This outputs a table with "I" rows of genes and the "J" columns of samples. Each entry in the table is the number of reads that can be uniquely assigned to the gene "i" in the sample "j". This file is of now ready and in the correct format for loading into R for differential expression analysis.
 
