@@ -174,7 +174,7 @@ Now we're ready to align the reads to the mm10 genome. We will align two ESC sam
 ```
 $ cd ~/scw/scw2016/tutorials/alignment/subset
     
-$ bsub -J L139_ESC_1 -W 00:20 -n 2 -q training STAR --runThreadN 2 --genomeDir /groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Sequence/starIndex/ --readFilesIn L139_ESC_2.subset.fastq --outFileNamePrefix L139_ESC_2.subset_ --outSAMtype BAM Unsorted --outSAMattributes Standard
+$ bsub -J L139_ESC_1 -W 00:20 -n 2 -R "rusage[mem=8000]" -q training STAR --runThreadN 2 --genomeDir /groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Sequence/starIndex/ --readFilesIn L139_ESC_2.subset.fastq --outFileNamePrefix L139_ESC_2.subset_ --outSAMtype BAM Unsorted --outSAMattributes Standard
     
 $ bsub -J L139_ESC_2 -W 00:20 -n 2 -q training tophat -p 2 -o L139_ESC_2-tophat --no-coverage-search --transcriptome-index=/groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Annotation/Genes/tophat2_trans/genes /groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Sequence/Bowtie2Index/genome L139_ESC_2.subset.fastq; mv L139_ESC_2-tophat/accepted_hits.bam L139_ESC_2-tophat/L139_ESC_2.bam
     
