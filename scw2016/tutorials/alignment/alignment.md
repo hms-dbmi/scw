@@ -278,7 +278,8 @@ The last step is to count the number of reads mapping to the features are are in
 ```bash
 $ module load seq/subread/1.4.6-p3			#featureCounts is part of the subread package
     
-$ featureCounts --primary -a /groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Annotation/Genes/genes.gtf -o combined.featureCounts *.bam
+$ featureCounts --primary -a /groups/shared_databases/igenome/Mus_musculus/UCSC/mm10/Annotation/Genes/genes.gtf \
+-o combined.featureCounts *.bam
 ```    
     
 ***
