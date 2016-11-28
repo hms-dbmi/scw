@@ -93,7 +93,7 @@ method.
 tSNE
 ====
 
-T-embedded stochastic neighbor embedding (tSNE) is a non-linear
+T-distributed stochastic neighbor embedding (tSNE) is a non-linear
 dimensionality reduction method. Note that in tSNE, the perplexity
 parameter is an estimate of the number of effective neighbors. Here, we
 have 224 cells. A perplexity of 10 is suitable. For larger or smaller
