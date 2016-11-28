@@ -20,7 +20,7 @@ al.](http://www.pnas.org/content/112/51/15672) has been pre-prepared for
 you. The data is provided as a matrix of gene counts, where each column
 corresponds to a cell and each row a gene.
 
-    load('../../data/cd.RData') 
+    load('data/cd.RData') 
 
     # how many genes? how many cells?
     dim(cd)
@@ -66,7 +66,7 @@ subpopulations: neurons and neuroprogenitor cells (NPCs). These labels
 have also been provided to you as a reference so we can see how
 different methods perform in recapitulating these labels.
 
-    load('../../data/sg.RData') 
+    load('data/sg.RData') 
     head(sg, 5)
 
     ## SRR2967608 SRR2967609 SRR2967610 SRR2967611 SRR2967612 
@@ -210,7 +210,7 @@ expressed genes.
     knn <- knn.error.models(cd, k = ncol(cd)/4, n.cores = 1, min.count.threshold = 2, min.nonfailed = 5, max.model.plots = 10)
 
     # just load from what we precomputed for you
-    load('../../data/knn.RData') 
+    load('data/knn.RData') 
 
 `PAGODA` relies on accurate quantification of excess variance or
 overdispersion in genes and gene sets in order to cluster cells and
@@ -226,7 +226,7 @@ to such technical noise.
     varinfo <- pagoda.subtract.aspect(varinfo, colSums(cd[, rownames(knn)]>0))
 
     # just load from what we precomputed for you
-    load('../../data/varinfo.RData') 
+    load('data/varinfo.RData') 
 
 When assessing for overdispersion in gene sets, we can take advantage of
 pre-defined pathway gene sets such as GO annotations and look for
@@ -238,7 +238,7 @@ whether the amount of variance explained by the first principal
 component significantly exceed the background expectation.
 
     # load gene sets
-    load('../../data/go.env.RData')
+    load('data/go.env.RData')
     # look at some gene sets
     head(ls(go.env))
 
@@ -278,7 +278,7 @@ Testing these pre-defined pathways and annotated gene sets may take a
 few minutes so for the sake of time, we will load a pre-computed
 version.
 
-    load('../../data/pwpca.RData')
+    load('data/pwpca.RData')
     clpca <- NULL # For the sake of time, set to NULL
 
 Taking into consideration both pre-defined pathways and de-novo gene
@@ -410,8 +410,8 @@ using differential expression analysis.
 Now, let's use `scde` to identify differentially expressed genes.
 
     # SCDE relies on the same error models
-    load('../../data/cd.RData')
-    load('../../data/knn.RData')
+    load('data/cd.RData')
+    load('data/knn.RData')
 
     # estimate gene expression prior
     prior <- scde.expression.prior(models = knn, counts = cd, length.out = 400, show.plot = FALSE)
@@ -467,7 +467,7 @@ lab](http://www.nature.com/nbt/journal/v32/n4/full/nbt.2859.html).
     library(monocle)
 
     # Monocle takes as input fpkms
-    load('../../data/fpm.RData')
+    load('data/fpm.RData')
     expression.data <- fpm
 
     # create pheno data object 
