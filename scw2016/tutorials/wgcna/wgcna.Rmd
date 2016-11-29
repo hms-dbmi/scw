@@ -1,1 +1,175 @@
- 
+---
+title: "WGCNA: Weighted gene co-expression network analysis"
+author: Assieh SAADATPOUR
+date: November 29, 2016
+output: md_document
+---
+
+```{r, include = FALSE}
+library(knitr)
+opts_chunk$set(
+    warning = FALSE,
+    message = FALSE,
+    fig.path = 'figure-2016/',
+    cache.path = 'cache/',
+    cache = TRUE
+)
+```
+
+========================================================
+
+
+This code has been adapted from the tutorials available at [WGCNA website](http://labs.genetics.ucla.edu/horvath/CoexpressionNetwork/Rpackages/WGCNA/). For the installation and more detailed analysis, please visit the website.
+
+
+Getting started: in order to run R on Orchestra, we will first connect to an interactive queue
+
+```{r eval=FALSE}
+# bsub -n 2 -Is -q interactive bash
+# git clone https://github.com/hms-dbmi/scw.git
+# cd scw/scw2016
+# source setup.sh
+# R
+```
+
+
+Loading WGCNA library, and settings to allow parallel execution. Please note that WGCNA and dependencies have been already installed for you.
+
+
+```{r messsage=FALSE,results='hide',warning=FALSE}
+
+library(WGCNA)
+library("flashClust")
+options(stringsAsFactors = FALSE);
+enableWGCNAThreads()
+
+```
+
+
+Loading the data;
+WGCNA requires genes be given in the columns. For the purpose of this exercise, we focus on a smaller set of n=500 most variable/over-dispersed genes:
+
+
+
+```{r 'load-data'}
+load('../../data/varinfo.RData');
+mydata=varinfo$mat;
+dim(mydata)
+gene.names=names(sort(varinfo$arv,decreasing=T));
+mydata.trans=t(mydata);
+
+n=500;
+datExpr=mydata.trans[,gene.names[1:n]];
+SubGeneNames=gene.names[1:n];
+
+```
+
+
+Choosing a soft-threshold power: a tradeoff between scale free topology and mean connectivity
+
+
+```{r 'softpower selection'}
+
+powers = c(c(1:10), seq(from = 12, to=20, by=2));
+sft=pickSoftThreshold(datExpr,dataIsExpr = TRUE,powerVector = powers,corFnc = cor,corOptions = list(use = 'p'),networkType = "signed")
+
+# Plot the results
+sizeGrWindow(9, 5)
+par(mfrow = c(1,2));
+cex1 = 0.9;
+
+# Scale-free topology fit index as a function of the soft-thresholding power
+plot(sft$fitIndices[,1], -sign(sft$fitIndices[,3])*sft$fitIndices[,2],xlab="Soft Threshold (power)",ylab="Scale Free Topology Model Fit, signed R^2",type="n", main = paste("Scale independence"));
+text(sft$fitIndices[,1], -sign(sft$fitIndices[,3])*sft$fitIndices[,2],labels=powers,cex=cex1,col="red");
+
+# Red line corresponds to using an R^2 cut-off
+abline(h=0.80,col="red")
+
+# Mean connectivity as a function of the soft-thresholding power
+plot(sft$fitIndices[,1], sft$fitIndices[,5],xlab="Soft Threshold (power)",ylab="Mean Connectivity", type="n",main = paste("Mean connectivity"))
+text(sft$fitIndices[,1], sft$fitIndices[,5], labels=powers, cex=cex1,col="red")
+
+```
+
+
+Generating adjacency and TOM similarity matrices based on the selected softpower
+
+
+```{r 'generate-TOM'}
+
+softPower = 5;
+
+#Calclute the adjacency matrix
+adj= adjacency(datExpr,type = "signed", power = softPower);
+
+#Turn adjacency matrix into a topological overlap matrix (TOM) to minimize the effects of noise and spurious associations
+TOM=TOMsimilarityFromExpr(datExpr,networkType = "signed", TOMType = "signed", power = softPower);
+colnames(TOM) =rownames(TOM) =SubGeneNames
+dissTOM=1-TOM
+```
+
+
+Module detection
+
+
+```{r 'module-detection'}
+
+#Hierarchical clustering of the genes based on the TOM dissimilarity measure
+geneTree = flashClust(as.dist(dissTOM),method="average");
+
+#Plot the resulting clustering tree (dendrogram)
+plot(geneTree, xlab="", sub="",cex=0.3);
+
+# Set the minimum module size
+minModuleSize = 20;
+
+# Module identification using dynamic tree cut, you can also choose the hybrid method
+
+dynamicMods = cutreeDynamic(dendro = geneTree,  method="tree", minClusterSize = minModuleSize);
+#dynamicMods = cutreeDynamic(dendro = geneTree, distM = dissTOM, method="hybrid", deepSplit = 2, pamRespectsDendro = FALSE, minClusterSize = minModuleSize);
+
+#Get the module labels and the size of each module. Lable 0 is reserved for unassigned genes
+table(dynamicMods)
+
+#Plot the module assignment under the dendrogram; note: The grey color is reserved for unassigned genes
+dynamicColors = labels2colors(dynamicMods)
+table(dynamicColors)
+plotDendroAndColors(geneTree, dynamicColors, "Dynamic Tree Cut", dendroLabels = FALSE, hang = 0.03, addGuide = TRUE, guideHang = 0.05, main = "Gene dendrogram and module colors")
+
+
+#Set the diagonal of the dissimilarity to NA 
+diag(dissTOM) = NA;
+
+#Visualize the Tom plot. Raise the dissimilarity matrix to a power  to bring out the module structure
+sizeGrWindow(7,7)
+TOMplot(dissTOM^4, geneTree, as.character(dynamicColors))
+
+```
+
+Extract modules
+
+```{r 'extract-modules'}
+
+module_colors= setdiff(unique(dynamicColors), "grey")
+for (color in module_colors){
+    module=SubGeneNames[which(dynamicColors==color)]
+    write.table(module, paste("module_",color, ".txt",sep=""), sep="\t", row.names=FALSE, col.names=FALSE,quote=FALSE)
+    
+}
+```
+
+Look at expression patterns of these genes, as they are clustered
+
+```{r 'expression-pattern'}
+
+module.order <- unlist(tapply(1:ncol(datExpr),as.factor(dynamicColors),I))
+m<-t(t(datExpr[,module.order])/apply(datExpr[,module.order],2,max))
+heatmap(t(m),zlim=c(0,1),col=gray.colors(100),Rowv=NA,Colv=NA,labRow=NA,scale="none",RowSideColors=dynamicColors[module.order])
+
+```
+
+We can now look at the module gene listings and try to interpret their functions; for instance using http://amigo.geneontology.org/rte
+
+
+
+WGCNA has many more features, such as quantifying module similarity by eigengene correlation, etc. For details, please visit [WGCNA website](http://labs.genetics.ucla.edu/horvath/CoexpressionNetwork/Rpackages/WGCNA/).
