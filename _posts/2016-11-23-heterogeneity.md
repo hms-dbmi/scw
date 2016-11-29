@@ -15,6 +15,37 @@ single cell RNA-seq data.
 Getting started
 ---------------
 
+Let's make sure we are all in the same relative libraries
+
+    jf154@loge ~/scw/scw2016 $  > pwd
+	/home/jf154/scw/scw2016
+	
+And launch R
+
+	jf154@loge ~/scw/scw2016 $  > R
+	
+	R version 3.2.1 (2015-06-18) -- "World-Famous Astronaut"
+	Copyright (C) 2015 The R Foundation for Statistical Computing
+	Platform: x86_64-unknown-linux-gnu (64-bit)
+	
+	R is free software and comes with ABSOLUTELY NO WARRANTY.
+	You are welcome to redistribute it under certain conditions.
+	Type 'license()' or 'licence()' for distribution details.
+	
+	  Natural language support but running in an English locale
+	  
+	  R is a collaborative project with many contributors.
+	  Type 'contributors()' for more information and
+	  'citation()' on how to cite R or R packages in publications.
+	  
+	  Type 'demo()' for some demos, 'help()' for on-line help, or
+	  'help.start()' for an HTML browser interface to help.
+	  Type 'q()' to quit R.
+	
+The remaining tutorial all takes place within R. 
+
+---
+
 A single cell dataset from [Camp et
 al.](http://www.pnas.org/content/112/51/15672) has been pre-prepared for
 you. The data is provided as a matrix of gene counts, where each column
