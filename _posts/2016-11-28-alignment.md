@@ -5,7 +5,7 @@ author: "Radhika Khetani"
 output: html_document
 ---
 
-#Setting up Orchestra
+# Setting up Orchestra
 
 To get on Orchestra you want to connect via ssh, and to turn X11 forwarding on. Turning X11 forwarding will let the Orchestra machines open windows on your local machine, which is useful for looking at the data.
 
@@ -34,7 +34,7 @@ Do that and you're ready to roll. You should see that you are now connected to a
 
 Notice that we used the `-n 2` option to allow two cores to be used for the analysis (in general you can set this to larger numbers if required, but we'll leave it at 2 for today so as to avoid overloading the system). 
 
-#Setup
+## Setting up to perform analysis 
 
 The first thing we will do is to checkout a copy of the workshop material from Github into your home directories. 
 
@@ -56,7 +56,7 @@ Since the data files needed for the analyses are fairly large, these are not sto
 
 
 
-#Introduction to the data
+## Introduction to the data
 
 The raw data we will be using for this part of the workshop lives here `/groups/pklab/scw/scw2015/ES.MEF.data/subset`:
 
@@ -108,7 +108,7 @@ These commands mean:
 * copy (`cp`) the folder `/groups/pklab/scw/scw2015/ES.MEF.data/subset` and everything underneath it (using the `-r`) to the current directory (denoted by a period `.`)
 
 
-#Quality control
+# Quality control
 
 With the start of any data analysis it is important to poke around at your data to see where the warts are. We are expecting single-cell datasets to be extra messy; we should be expecting failures in preparing the libraries, failures in adequately capturing the transcriptome of the cell, libraries that sequence the same reads repeatedly and other issues. In particular we expect the libraries to not be very complex; these are just tags of the end of a transcript and so for each transcript there are a limited number of positions where a read can be placed. We'll see how this feature skews some of the more commonly used quality metrics now.
 
@@ -164,7 +164,7 @@ If we BLAST this sequence to the mouse genome, we come up empty, so it is some k
 ***
 ***
 
-#Alignment
+# Alignment
 
 For aligning RNA-seq reads it is necessary to use an aligner that is splice-aware; reads crossing splice junctions have gaps when aligned to the genome and the aligner has to be able to handle that possibility. There are a wide variety of aligners to choose from that handle spliced reads, e.g. STAR, HISAT2. STAR requires a lot of memory whereas HISAT2 is fast and does not require as much memoty.
 
@@ -267,7 +267,7 @@ done
 
 This will loop over all of the files with a `.fastq` extension in the current directory and align them with HISAT2. We'll skip ahead now to doing some quality control of the alignments and finally counting the reads mapping to each feature.
 
-# Quality checking the alignments
+## Quality checking the alignments
 
 There are several tools to spot check the alignments, it is common to run [RNA-SeQC](https://www.broadinstitute.org/cancer/cga/rna-seqc) on the alignment files to generate some alignment stats and to determine the overall coverage, how many genes were detected and so on. Another option for a suite of quality checking tools is RSeQC. For real experiments it is worth it to look at the output of these tools and see if anything seems amiss.
 
