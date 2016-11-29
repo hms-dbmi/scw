@@ -52,7 +52,11 @@ WGCNA requires genes be given in the columns. For the purpose of this exercise, 
 
 
 ```{r 'load-data'}
+<<<<<<< HEAD
 load('../../data/varinfo.RData');
+=======
+load('data/varinfo.RData');
+>>>>>>> 82ee2b02e58129c625f25fdf0ba3aaabd5a8d4bb
 mydata=varinfo$mat;
 dim(mydata)
 gene.names=names(sort(varinfo$arv,decreasing=T));
