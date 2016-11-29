@@ -41,7 +41,8 @@ Loading WGCNA library, and settings to allow parallel execution. Please note tha
 library(WGCNA)
 library("flashClust")
 options(stringsAsFactors = FALSE);
-enableWGCNAThreads()
+#enableWGCNAThreads()
+disableWGCNAThreads()
 
 ```
 
@@ -52,11 +53,7 @@ WGCNA requires genes be given in the columns. For the purpose of this exercise, 
 
 
 ```{r 'load-data'}
-<<<<<<< HEAD
 load('../../data/varinfo.RData');
-=======
-load('data/varinfo.RData');
->>>>>>> 82ee2b02e58129c625f25fdf0ba3aaabd5a8d4bb
 mydata=varinfo$mat;
 dim(mydata)
 gene.names=names(sort(varinfo$arv,decreasing=T));
@@ -78,7 +75,7 @@ powers = c(c(1:10), seq(from = 12, to=20, by=2));
 sft=pickSoftThreshold(datExpr,dataIsExpr = TRUE,powerVector = powers,corFnc = cor,corOptions = list(use = 'p'),networkType = "signed")
 
 # Plot the results
-sizeGrWindow(9, 5)
+# sizeGrWindow(9, 5)
 par(mfrow = c(1,2));
 cex1 = 0.9;
 
@@ -145,7 +142,7 @@ plotDendroAndColors(geneTree, dynamicColors, "Dynamic Tree Cut", dendroLabels = 
 diag(dissTOM) = NA;
 
 #Visualize the Tom plot. Raise the dissimilarity matrix to a power  to bring out the module structure
-sizeGrWindow(7,7)
+#sizeGrWindow(7,7)
 TOMplot(dissTOM^4, geneTree, as.character(dynamicColors))
 
 ```
