@@ -92,7 +92,7 @@ We'll be taking this small subset of reads and performing the following steps:
 
 The counts table generated from step 3 will be the starting point for the more interesting downstream functional analyses. We'll use these subsetted ES and MEF files to demonstrate the workflow; then, we'll look at pre-computed counts results on a full set of samples for the functional analyses.
 
-#Copy across data into your own directories
+## Copy across data into your own directories
 
 We will now copy over the test data over into your alignment directory.
 
