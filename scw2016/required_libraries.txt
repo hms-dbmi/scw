@@ -23,7 +23,7 @@ Rtsne
 DESeq
 BiocParallel (bioconductor)
 DESeq2 (bioconductor)
-monocle
+monocle (bioconductor)
 
 # WGCNA tutorial
 dynamicTreeCut
