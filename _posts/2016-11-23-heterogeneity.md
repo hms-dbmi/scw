@@ -533,3 +533,9 @@ this example, we will simply choose genes based on prior knowledge.
     plot_spanning_tree(data, color_by = "pagoda") 
 
 ![](figure-2016/monocle-2-3.png)
+
+---
+
+Author: Jean Fan
+Website: [jef.works](http://jef.works/)
+Twitter: [JEFworks](https://twitter.com/jefworks)
