@@ -178,8 +178,8 @@ $ module load seq/samtools/1.3
 To align reads with HISAT2 you need three things.
 
 1. The genome sequence of the organism you are working with in FASTA format. You will use this to make an index.
-* The known splice junctions that can be obtained from the gene annotation or GTF file. You can use the GTF file to make a text file fo splice junctions.
-* The FASTQ file of reads you want to align.
+1. The known splice junctions that can be obtained from the gene annotation or GTF file. You can use the GTF file to make a text file fo splice junctions.
+1. The FASTQ file of reads you want to align.
 
 First you must make an index of the genome sequence; this allows the HISAT2 algorithm to rapidly find regions of the genome where each read might align. In addition, if you are planning to use the known gene annotations as a guide for alignment, you will need to the splice junction text file. Both of these have already been created for use with this workshop, so **don't type in the following commands**:
 
