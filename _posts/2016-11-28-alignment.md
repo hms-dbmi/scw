@@ -121,7 +121,8 @@ FastQC is pretty fast, especially on small files, so we can run FastQC on one of
 
 ```bash
 $ mkdir ~/scw/scw2016/tutorials/alignment/fastq
-$ cp /groups/pklab/scw/scw2015/ES.MEF.data/fastq/L139_ESC_1.fq ~/scw/scw2016/tutorials/alignment/fastq/
+$ cp /groups/pklab/scw/scw2015/ES.MEF.data/fastq/L139_ESC_1.fq \
+	~/scw/scw2016/tutorials/alignment/fastq/
 $ cd ~/scw/scw2016/tutorials/alignment/fastq
 ```
 
