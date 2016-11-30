@@ -275,12 +275,13 @@ There are several tools to spot check the alignments, it is common to run [RNA-S
 
 # Counting reads with featureCounts
 
-The last step is to count the number of reads mapping to the features are are interested in. Quantification can be done at multiple levels; from the level of counting the number of reads supporting a specific splicing event, to the number of reads aligning to an isoform of a gene or the total reads mapping to a known gene. We'll be quantifying the latter, i.e. the total number of reads that can uniquely be assigned to a known gene; basically looking at the location of read alignment on the genome and putting it together with the location of the gene on the genome (this information is contained in the [GTF](http://mblab.wustl.edu/GTF2.html)/annotation file). There are several tools to do this, we will use [featureCounts](http://bioinf.wehi.edu.au/featureCounts/) because it is very fast and accurate.
+The last step is to count the number of reads mapping to the features we are interested in. Quantification can be done at multiple levels; from the level of counting the number of reads supporting a specific splicing event, to the number of reads aligning to an isoform of a gene or the total reads mapping to a known gene. We'll be quantifying the latter, i.e. the total number of reads that can uniquely be assigned to a known gene; basically looking at the location of read alignment on the genome and putting it together with the location of the gene on the genome (this information is contained in the [GTF](http://mblab.wustl.edu/GTF2.html)/annotation file). There are several tools to do this, we will use [featureCounts](http://bioinf.wehi.edu.au/featureCounts/) because it is very fast and accurate.
 
 ```bash
-$ module load seq/subread/1.4.6-p3			#featureCounts is part of the subread package
+$ module load seq/subread/1.4.6-p3    #featureCounts is part of the subread package
     
-$ featureCounts --primary -a /n/scratch2/scw2016/mm10_UCSC_genes.gtf -o combined.featureCounts *.bam
+$ featureCounts --primary -a /n/scratch2/scw2016/mm10_UCSC_genes.gtf \
+	-o combined.featureCounts *.bam
 ```    
     
 ***
@@ -289,7 +290,9 @@ $ featureCounts --primary -a /n/scratch2/scw2016/mm10_UCSC_genes.gtf -o combined
 
 We need to massage the format of this file so we can use it. We'll take the first column, which is the gene ids and every column after the 6th, which has the counts of each sample.
 
-    $ sed 1d combined.featureCounts | cut -f1,7- | sed s/Geneid/id/ > combined.counts
+```bash
+$ sed 1d combined.featureCounts | cut -f1,7- | sed s/Geneid/id/ > combined.counts
+```
 
 This command means *s*team *ed*it (`sed`) the file `combined.featureCounts` by 
 ***
