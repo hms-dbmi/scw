@@ -240,8 +240,9 @@ The syntax of the HISAT2 command is:
 ```bash
 ## DO NOT RUN THIS
 
-hisat2 -p <num_threads> -x <path_to_genome_index> -U <input_fastq_unpaired> \
---known-splicesite-infile <splicesites.txt> | samtools view -Sbo <name_of_ouput.bam> -
+hisat2 -p <num_threads> -x <path_to_genome_index> \
+-U <input_fastq_unpaired> --known-splicesite-infile <splicesites.txt> \
+| samtools view -Sbo <name_of_ouput.bam> -
 ```
 
 *Note: HISAT2 outputs alignment results in SAM format as standard output, so we pipe it to `samtools` and convert it to BAM in the same command.*
