@@ -305,3 +305,7 @@ This command means *s*team *ed*it (`sed`) the file `combined.featureCounts` by
 ***
 This outputs a table with "I" rows of genes and the "J" columns of samples. Each entry in the table is the number of reads that can be uniquely assigned to the gene "i" in the sample "j". This file is of now ready and in the correct format for loading into R for differential expression analysis.
 
+## Contact info:
+email: [rkhetani@hsph.harvard.edu](mailto: rkhetani@hsph.harvard.edu)
+webpage: [http://bioinformatics.sph.harvard.edu/](http://bioinformatics.sph.harvard.edu/)
+twitter: [rs_khetani](https://twitter.com/rs_khetani)
