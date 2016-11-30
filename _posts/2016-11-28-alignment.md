@@ -260,7 +260,8 @@ for file in *.fastq
 do
     samplename=$(basename $file .fastq)
     
-    bsub -J $samplename -W 00:20 -n 8 -o %J.$samplename.out -e %J.$samplename.err -q short "hisat2 -p 7 -x genome_index \
+    bsub -J $samplename -W 00:20 -n 8 -o %J.$samplename.out \
+    -e %J.$samplename.err -q short "hisat2 -p 7 -x genome_index \
     -U $samplename splicesites.txt | samtools view -Sbo $samplename.bam -"
     
 done
