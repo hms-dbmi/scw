@@ -60,6 +60,12 @@ S4Vectors (bioconductor)
 IRanges (bioconductor)
 WGCNA
 
+## normalization and batch effects tutorial
+scater
+scran
+cowplot
+
+
 # To generate markdown with knitr
 knitr
 stringi
