@@ -184,19 +184,19 @@ To align reads with HISAT2 you need three things.
 First you must make an index of the genome sequence; this allows the HISAT2 algorithm to rapidly find regions of the genome where each read might align. In addition, if you are planning to use the known gene annotations as a guide for alignment, you will need to the splice junction text file. Both of these have already been created for use with this workshop, so **don't type in the following commands**:
 
 ```bash
-# don't type this in
+## DO NOT RUN THIS
 $ hisat2-build -p <num_cores> <genome.fa> <prefix_for_index>
 	
 $ hisat2_extract_splice_sites.py <genes.gtf> > <splicesites.txt>
 ```
-We will be using precomputed indices for the mm10 genome today:
+We will be using precomputed indices for the mm10 genome today, and the path to those are listed below:
 
 ```bash
 /n/scratch2/scw2016/reference_index/mm10_hisat2/
 /n/scratch2/scw2016/reference_index/mm10_hisat2/splicesites.txt
 ```
 
-We will align two ESC samples and two MEF samples:
+Let's start by aligning the two ESC samples and two MEF samples we copied over earlier:
 
 ```bash
 $ cd ~/scw/scw2016/tutorials/alignment/subset
