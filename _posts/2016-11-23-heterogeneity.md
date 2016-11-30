@@ -15,7 +15,7 @@ single cell RNA-seq data.
 Getting started
 ---------------
 
-Let's make sure we are all in the same relative libraries
+Let's make sure we are all in the same relative directories
 
     jf154@loge ~/scw/scw2016 $  > pwd
 	/home/jf154/scw/scw2016
