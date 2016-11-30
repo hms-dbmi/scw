@@ -536,6 +536,4 @@ this example, we will simply choose genes based on prior knowledge.
 
 ---
 
-Author: Jean Fan
-Website: [jef.works](http://jef.works/)
-Twitter: [JEFworks](https://twitter.com/jefworks)
+Author: Jean Fan | Website: [jef.works](http://jef.works/) | Twitter: [JEFworks](https://twitter.com/jefworks) | Github: [JEFworks](https://github.com/JEFworks/)
