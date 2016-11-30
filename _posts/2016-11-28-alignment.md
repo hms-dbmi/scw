@@ -166,7 +166,7 @@ If we BLAST this sequence to the mouse genome, we come up empty, so it is some k
 
 # Alignment
 
-For aligning RNA-seq reads it is necessary to use an aligner that is splice-aware; reads crossing splice junctions have gaps when aligned to the genome and the aligner has to be able to handle that possibility. There are a wide variety of aligners to choose from that handle spliced reads, e.g. STAR, HISAT2. STAR requires a lot of memory whereas HISAT2 is fast and does not require as much memoty.
+For aligning RNA-seq reads it is necessary to use an aligner that is splice-aware; reads crossing splice junctions have gaps when aligned to the genome and the aligner has to be able to handle that possibility. There are a wide variety of aligners to choose from that handle spliced reads, e.g. STAR, HISAT2. STAR requires a lot of memory whereas HISAT2 is fast and does not require as much memory.
 
 For this exercise we will use HISAT2, so let's load the 2 modules we will need. 
 	
