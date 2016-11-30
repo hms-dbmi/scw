@@ -307,5 +307,7 @@ This outputs a table with "I" rows of genes and the "J" columns of samples. Each
 
 ## Contact info:
 email: [rkhetani@hsph.harvard.edu](mailto: rkhetani@hsph.harvard.edu)
+
 webpage: [http://bioinformatics.sph.harvard.edu/](http://bioinformatics.sph.harvard.edu/)
+
 twitter: [rs_khetani](https://twitter.com/rs_khetani)
