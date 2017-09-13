@@ -1,0 +1,194 @@
+---
+title: "Heterogeneity analysis II"
+output: html_notebook
+---
+
+Here we'll use a recent dataset on chromaffin cell differentiation to look at different visualization and pseudotime techniques.
+
+## Loading data
+We generally start with count matrices. These are obtained from alignment results and protocol-specific demultiplexing routines. Chromaffin dataset was measured using SMART-seq2 protocol, and the reads for each cell are then reported in a separate bam file. We use featureCounts to extract the read counts per gene:
+
+`for name in ``find ./ -name \"*.bam\" -print``; do sem -j 50 featureCounts -p -a mm10.genes.gtf -o ${name%.bam}.counts $name; done;`
+
+
+```{r}
+counts.dir <- "../data/counts"
+str(list.files(path=counts.dir))
+```
+
+We'll define a quick function to read them in in parallel:
+```{r}
+t.read.in.counts <- function(path,n.cores) {
+  fs <- list.files(path=path,pattern=".*_unique.counts$",recursive=T)
+  names(fs) <- gsub("_unique.counts","",fs)
+  names(fs) <- gsub(".+?/","",names(fs))
+  dat <- do.call(cbind,mclapply(fs,function(file) { df <- read.delim(paste(path,file,sep="/"),header=F,stringsAsFactors=F,skip=2); x <- df[,7]; names(x) <- df[,1]; x;},mc.cores=n.cores))
+  colnames(dat) <- paste(path,colnames(dat),sep=".");
+  dat
+}
+```
+
+```{r}
+data.path <- '../data';
+counts.dir <- paste(data.path,'counts',sep='/')
+dat <- t.read.in.counts(counts.dir,10)
+```
+
+```{r}
+
+colnames(dat) <- gsub("../data/counts.","",colnames(dat))
+str(dat)
+rm(dat);
+```
+
+The data was the processed using scde/PAGODA:
+```{r eval=FALSE}
+source("pagoda.helpers.r")
+library(Cairo); library(parallel)
+n.cores <- 30;
+min.cell.genes <- 3e3; min.cell.reads <- 1e5; min.gene.reads <- 10; min.gene.cells <- 5; min.nonfailed <- 8;
+n.groups <- 10; trim <- 3;
+res <- t.process.dataset(cd,nam)
+res <- c(res,t.postprocess(res,name="E12_5_c",port = NULL,perplexity = 10,include.aspects = TRUE,distance.threshold = 0.9, n.clusters = 5, top.aspects = 7,return.details=T))
+```
+
+
+But let's read in results of the processing:
+```{r}
+res <- readRDS(paste(data.path,"processed.rds",sep='/'))
+names(res)
+```
+
+```{r}
+show.app(res$app,name='chromaffin',browse=T)
+```
+
+Let's recapitulate the t-SNE embedding plot:
+```{r}
+par(mfrow=c(1,1), mar = c(0.5,0.5,0.5,0.5), mgp = c(2,0.65,0), cex = 0.9);
+plot(res$emb,col=1,bg=adjustcolor(res$cols,alpha=0.6),cex=2,pch=21,panel.first=grid(),axes=F); box();
+```
+
+Let's try different visualizations of the same dataset. 
+
+
+## PCA
+
+```{r}
+# get an FPM matrix as log10(FPM+1)
+#fpm <- log10(exp(scde.expression.magnitude(res$knn, res$cd))+1)
+lib.size <- colSums(res$cd);
+fpm <- log10(t(t(res$cd)/lib.size)+1)
+```
+
+Run PCA:
+```{r}
+require(pcaMethods)
+base.pca <- pca(t(fpm),nPcs = 2)
+```
+
+And visualize:
+```{r}
+par(mfrow=c(1,1), mar = c(0.5,0.5,0.5,0.5), mgp = c(2,0.65,0), cex = 0.9);
+plot(scores(base.pca),col=1,bg=adjustcolor(res$cols,alpha=0.6),cex=2,pch=21,panel.first=grid(),axes=F); box();
+```
+
+Let's use PAGODA library size estimation instead:
+```{r}
+# get an FPM matrix as log10(FPM+1)
+fpm <- log10(exp(scde.expression.magnitude(res$knn, res$cd))+1)
+base.pca <- pca(t(fpm),nPcs = 2)
+par(mfrow=c(1,1), mar = c(0.5,0.5,0.5,0.5), mgp = c(2,0.65,0), cex = 0.9);
+plot(scores(base.pca),col=1,bg=adjustcolor(res$cols,alpha=0.6),cex=2,pch=21,panel.first=grid(),axes=F); box();
+```
+
+We can run PCA on just a set of overdispersed genes to make things faster:
+```{r}
+od.genes <- names(which(res$varinfo$arv>1.2))
+length(od.genes)
+od.pca <- pca(t(fpm[od.genes,]),nPcs = 2)
+par(mfrow=c(1,1), mar = c(0.5,0.5,0.5,0.5), mgp = c(2,0.65,0), cex = 0.9);
+plot(scores(od.pca),col=1,bg=adjustcolor(res$cols,alpha=0.6),cex=2,pch=21,panel.first=grid(),axes=F); box();
+```
+
+
+## tSNE 
+
+By default, tSNE will measure cell similarity using Euclidean distance in PCA space:
+```{r}
+tsne <- Rtsne(t(fpm[od.genes,]), perplexity=50, verbose = FALSE, num_threads=10) 
+```
+
+```{r}
+par(mfrow=c(1,1), mar = c(0.5,0.5,0.5,0.5), mgp = c(2,0.65,0), cex = 0.9);
+plot(tsne$Y,col=1,bg=adjustcolor(res$cols,alpha=0.6),cex=2,pch=21,panel.first=grid(),axes=F); box();
+```
+
+Another good alternative is correlation distance (on od genes, or on PCs):
+```{r}
+d <- as.dist(1-cor(fpm[od.genes,]))
+```
+
+```{r}
+tsne2 <- Rtsne(d, is_distance = TRUE, perplexity=50, verbose = F, num_threads=10) 
+```
+
+```{r}
+par(mfrow=c(1,1), mar = c(0.5,0.5,0.5,0.5), mgp = c(2,0.65,0), cex = 0.9);
+plot(tsne2$Y,col=1,bg=adjustcolor(res$cols,alpha=0.6),cex=2,pch=21,panel.first=grid(),axes=F); box();
+```
+
+We can see what increasing or decreasing perplexity does:
+```{r}
+tsne3 <- Rtsne(d, is_distance = TRUE, perplexity=3, verbose = F, num_threads=10) 
+```
+
+```{r}
+par(mfrow=c(1,1), mar = c(0.5,0.5,0.5,0.5), mgp = c(2,0.65,0), cex = 0.9);
+plot(tsne3$Y,col=1,bg=adjustcolor(res$cols,alpha=0.6),cex=2,pch=21,panel.first=grid(),axes=F); box();
+```
+
+## Diffusion maps
+
+Calculate diffusion map using overdispersed genes:
+```{r}
+require("destiny")
+dm <- DiffusionMap(t(fpm[od.genes,]), verbose = FALSE,k=15,sigma=100)
+```
+
+visualize:
+```{r}
+par(mfrow=c(1,1), mar = c(0.5,0.5,0.5,0.5), mgp = c(2,0.65,0), cex = 0.9);
+plot(dm@eigenvectors[,c(1,2)],col=1,bg=adjustcolor(res$cols,alpha=0.6),cex=2,pch=21,panel.first=grid(),axes=F); box();
+```
+
+
+## Monocle2
+
+Monocle aims to reconstruct a tree and determine embedding that best represents that tree.
+First we have to represent a dataset in a different way:
+```{r}
+require("monocle")
+pd <- as.data.frame(cbind(res$cols ));
+rownames(pd) <- colnames(fpm); colnames(pd) <- c("color")
+pd = new("AnnotatedDataFrame", data = pd )
+
+fd <- as.data.frame(ifelse(rownames(fpm) %in% od.genes,1,0));
+rownames(fd) <- rownames(fpm); colnames(fd) <- c("od")
+fd = new("AnnotatedDataFrame", data = fd)
+
+fpm1 <- newCellDataSet(fpm, phenoData = pd, featureData = fd)
+```
+
+```{r}
+fpm1 = setOrderingFilter(fpm1,od.genes)
+mncl = reduceDimension(fpm1, max_components=2)
+mncl = orderCells(mncl)
+```
+
+
+```{r}
+plot_cell_trajectory(mncl)
+plot(mncl@reducedDimS[1,],mncl@reducedDimS[2,],col=as.character(mncl@phenoData@data$col))
+```
+
