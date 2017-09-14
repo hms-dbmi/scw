@@ -1,13 +1,68 @@
 ---
-title: "R Notebook"
+title: "Heterogeneity analysis III"
 output: html_notebook
 ---
 
+Modern high-throughput datasets. Here we'll analyze a 10x Chromium dataset using pagoda2.
+
 ```{r}
 library(pagoda2)
+```
 
+
+10x count matrix is normally split into three files. Let's write a utility function to load it:
+```{r}
 # set names euqal to the values
 sn <- function(x) { names(x) <- x; return(x); }
+
+# load 10x matrices from a named list of result folders
+t.load.10x.data <- function(matrixPaths,n.cores=1) {
+  require(parallel)
+  require(Matrix)
+  mclapply(sn(names(matrixPaths)),function(nam) {
+    matrixPath <- matrixPaths[nam];
+    # read all count files (*_unique.counts) under a given path
+    #cat("loading data from ",matrixPath, " ");
+    x <- as(readMM(paste(matrixPath,'matrix.mtx',sep='/')),'dgCMatrix'); # convert to the required sparse matrix representation
+    cat(".")
+    gs <- read.delim(paste(matrixPath,'genes.tsv',sep='/'),header=F)
+    rownames(x) <- gs[,2]
+    cat(".")
+    gs <- read.delim(paste(matrixPath,'barcodes.tsv',sep='/'),header=F)
+    colnames(x) <- gs[,1]
+    cat(".")
+    colnames(x) <- paste(nam,colnames(x),sep='_');
+    x
+  },mc.cores=n.cores)
+}
+n.cores <- 30;
+```
+
+
+Load (10x PBMC data)[https://support.10xgenomics.com/single-cell-gene-expression/datasets/pbmc8k]:
+```{r}
+data.path <- "~/workshop_materials/transcriptomics/10x_pbmc8k"
+#data.path <- "/d0-mendel/home/pkharchenko/p2/walkthrough/pbmc8k/raw_gene_bc_matrices/GRCh38"
+cd <- t.load.10x.data(list(PBMC8K=data.path))
+```
+```{r}
+str(cd)
+
+```
+
+
+Look at the summary counts
+```{r}
+cd <- cd[[1]]
+par(mfrow=c(1,2), mar = c(3.5,3.5,2.0,0.5), mgp = c(2,0.65,0), cex = 1.0)
+hist(log10(colSums(cd)+1),main='reads per cell',col='wheat')
+hist(log10(rowSums(cd)+1),main='reads per gene',col='wheat')
+```
+
+
+
+Define a quick cell filtering function based on cell depth vs. number of genes relationship:
+```{r}
 # filter cells based on the gene/molecule dependency
 t.filter.for.valid.cells <- function(countMatrix,min.cell.size=500, max.cell.size=5e4,p.level=min(1e-3,1/ncol(countMatrix)),alpha=0.1,do.par=T) {
   if(do.par) { par(mfrow=c(1,2), mar = c(3.5,3.5,2.0,0.5), mgp = c(2,0.65,0), cex = 1.0);}
@@ -33,78 +88,176 @@ t.filter.for.valid.cells <- function(countMatrix,min.cell.size=500, max.cell.siz
   valid.cells <- colSums(countMatrix)>min.cell.size & colSums(countMatrix)<max.cell.size & !(colnames(countMatrix) %in% outliers)
   countMatrix[,valid.cells,drop=F]
 }
-# load 10x matrices from a named list of result folders
-t.load.10x.data <- function(matrixPaths) {
-  require(parallel)
-  require(Matrix)
-  mclapply(sn(names(matrixPaths)),function(nam) {
-    matrixPath <- matrixPaths[nam];
-    # read all count files (*_unique.counts) under a given path
-    #cat("loading data from ",matrixPath, " ");
-    x <- as(readMM(paste(matrixPath,'matrix.mtx',sep='/')),'dgCMatrix'); # convert to the required sparse matrix representation
-    cat(".")
-    gs <- read.delim(paste(matrixPath,'genes.tsv',sep='/'),header=F)
-    rownames(x) <- gs[,2]
-    cat(".")
-    gs <- read.delim(paste(matrixPath,'barcodes.tsv',sep='/'),header=F)
-    colnames(x) <- gs[,1]
-    cat(".")
-    colnames(x) <- paste(nam,colnames(x),sep='_');
-    x
-  },mc.cores=30)
-}
+
+```
+
+
+Run the filtering procedure:
+```{r}
+counts <- t.filter.for.valid.cells(cd,min.cell.size=500)
 ```
 
 
 ```{r}
-data.path <- "~/workshop_materials/transcriptomics/10x_pbmc8k"
-cd <- t.load.10x.data(list(PBMC8K=data.path))
-```
-```{r}
-str(cd)
+str(counts)
 ```
 
-```{r}
-counts <- t.filter.for.valid.cells(cd[[1]],min.cell.size=500)
-```
+We can also looka at the number of molecules per gene, and omit low-expressed genes to save computational time:
 
 ```{r}
+hist(log10(rowSums(counts)+1),main='Molecules per gene',xlab='molecules (log10)',col='wheat')
+abline(v=1,lty=2,col=2)
+```
+
+Now we have a clean/lean count matrix and are ready to start analysis. First we’ll create pagoda2 object that will maintain all of the results. It will also provide handles for running all operations on the data.
+
+```{r error=TRUE}
 r <- Pagoda2$new(counts,log.scale=FALSE)
 ```
 
+
+Yes, we need to make gene names unique:
 ```{r}
 rownames(counts) <- make.unique(rownames(counts))
 r <- Pagoda2$new(counts,log.scale=FALSE)
 ```
 
+Next, we’ll adjust the variance, to normalize the extent to which genes with (very) different expression magnitudes will contribute to the downstream anlaysis:
 
 ```{r}
 r$adjustVariance(plot=T,gam.k=10)
 ```
 
-
+There are many alternative ways of proceeding with the downstream analysis. Below we’ll use the simplest, default scenario, where we first reduce the dataset dimensions by running PCA, and then move into k-nearest neighbor graph space for clustering and visualization calculations. First, the PCA reduction:
 ```{r}
 r$calculatePcaReduction(nPcs=100,n.odgenes=3e3,maxit = 200)
 ```
 
-```{r}
+
+Clustering, visualization and many other procedures can take advantage of a cell kNN graph. Let's calculate it.
+```{r echo=FALSE}
 r$makeKnnGraph(k=40,type='PCA',center=T,distance='cosine')
 ```
 
+
+Determine clusters using "multilevel.community" algorithm.
 ```{r}
 r$getKnnClusters(method=multilevel.community,type='PCA')
 ```
 
+
+Determine a largeVis embedding:
 ```{r}
 M <- 30; r$getEmbedding(type = 'PCA',embeddingType = 'largeVis', M = M,  perplexity = 30,  gamma = 1 / M,  alpha = 1)
 ```
-
+Now we can visualize the embedding using the determined clusters:
 
 ```{r}
 r$plotEmbedding(type='PCA',show.legend=F,mark.clusters=T,min.group.size=50,shuffle.colors=F,mark.cluster.cex=1,alpha=0.1,main='clusters (lV)')
 ```
 
 ```{r}
-r$getEmbedding(type='PCA',embeddingType='tSNE',perplexity=50,verbose=F,n.cores=2)
+r$getEmbedding(type='PCA',embeddingType='tSNE',perplexity=50,verbose=F,n.cores=n.cores)
+```
+```{r}
+r$plotEmbedding(type='PCA',embeddingType='tSNE',show.legend=F,mark.clusters=T,min.group.size=1,shuffle.colors=F,mark.cluster.cex=1,alpha=0.1,main='clusters (tSNE)')
+```
+
+Or load precalculated tSNE
+```{r eval=F}
+tSNE <- readRDS("tSNE.rds")
+r$embeddings$PCA$tSNE <- tSNE;
+```
+
+
+
+We can use the same plotEmbedding() function to show all kinds of other values. For instance, let’s look at depth, or an expresson pattern of a gene:
+
+```{r}
+str(r$depth)
+```
+```{r}
+par(mfrow=c(1,2))
+r$plotEmbedding(type='PCA',embeddingType='tSNE',show.legend=F,mark.clusters=T,min.group.size=1,shuffle.colors=F,mark.cluster.cex=1,alpha=0.1,main='clusters (tSNE)')
+r$plotEmbedding(type='PCA',embeddingType='tSNE',colors=r$depth,shuffle.colors=F,mark.cluster.cex=1,alpha=0.1,main='depth')
+```
+Or expression of a given gene:
+```{r}
+par(mfrow=c(1,2))
+r$plotEmbedding(type='PCA',embeddingType='tSNE',show.legend=F,mark.clusters=T,min.group.size=1,shuffle.colors=F,mark.cluster.cex=1,alpha=0.1,main='clusters (tSNE)')
+
+gene <-"LYZ"
+r$plotEmbedding(type='PCA',embeddingType='tSNE',colors=r$counts[,gene],shuffle.colors=F,mark.cluster.cex=1,alpha=0.1,main=gene)
+```
+
+We can generate multiple potential clusterings, with different names. Here we’ll use multilevel clustering:
+```{r}
+r$getKnnClusters(method=infomap.community,type='PCA',name='infomap')
+str(r$clusters)
+```
+
+Compare with infomap:
+```{r}
+par(mfrow=c(1,2))
+r$plotEmbedding(type='PCA',embeddingType='tSNE',groups=r$clusters$PCA$community,show.legend=F,mark.clusters=T,min.group.size=1,shuffle.colors=F,mark.cluster.cex=1,alpha=0.1,main='multilevel clusters (tSNE)')
+r$plotEmbedding(type='PCA',embeddingType='tSNE',clusterType='infomap',show.legend=F,mark.clusters=T,min.group.size=1,shuffle.colors=F,mark.cluster.cex=1,alpha=0.1,main='infomap clusters (tSNE)')
+
+```
+
+You can try other cluster methods (e.g. walktrap.community), or change k on the gene kNN graph.
+
+
+Run differential expression on the infomap clusters:
+```{r}
+r$getDifferentialGenes(type='PCA',verbose=T,clusterType='community')
+```
+Visualize top genes:
+```{r}
+names(r$diffgenes)
+```
+
+```{r}
+de <- r$diffgenes$PCA[[1]][['4']];
+r$plotGeneHeatmap(genes=rownames(de)[1:15],groups=r$clusters$PCA[[1]])
+```
+
+Spot-check a gene:
+```{r}
+gene <-"IGHM"
+r$plotEmbedding(type='PCA',embeddingType='tSNE',colors=r$counts[,gene],shuffle.colors=F,mark.cluster.cex=1,alpha=0.1,main=gene)
+```
+
+Pathway overdispersion analysis (a la PAGODA1)
+
+First, build GO->gene environment:
+```{r eval=F}
+suppressMessages(library(org.Hs.eg.db))
+# translate gene names to ids
+ids <- unlist(lapply(mget(colnames(r$counts),org.Hs.egALIAS2EG,ifnotfound=NA),function(x) x[1]))
+# reverse map
+rids <- names(ids); names(rids) <- ids;
+# list all the ids per GO category
+go.env <- list2env(eapply(org.Hs.egGO2ALLEGS,function(x) as.character(na.omit(rids[x]))))
+```
+
+Now run overdispersion anlaysis
+```{r eval=F}
+r$testPathwayOverdispersion(go.env,verbose=T,correlation.distance.threshold=0.95,recalculate.pca=F,top.aspects=15)
+```
+
+
+We'll use hierarchical differential expression results instead:
+```{r}
+r$getHierarchicalDiffExpressionAspects(type='PCA',clusterName='community',z.threshold=3)
+```
+
+We'll make an app with that, ordering the "differential expression aspects" explicitly (otherwise if row clustering is omitted they'll be clustered by similarity)
+```{r}
+app <- p2.make.pagoda1.app(r,inner.clustering=TRUE,embeddingType='tSNE',clusterType='community',min.group.size=50,row.clustering=list(order=rev(1:nrow(r$misc$pathwayOD$xv))))
+```
+
+Show app:
+```{r eval=F}
+show.app(app,'pbmc',browse=T)
 ```
 
