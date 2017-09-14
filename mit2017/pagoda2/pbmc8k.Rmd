@@ -1,0 +1,110 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(pagoda2)
+
+# set names euqal to the values
+sn <- function(x) { names(x) <- x; return(x); }
+# filter cells based on the gene/molecule dependency
+t.filter.for.valid.cells <- function(countMatrix,min.cell.size=500, max.cell.size=5e4,p.level=min(1e-3,1/ncol(countMatrix)),alpha=0.1,do.par=T) {
+  if(do.par) { par(mfrow=c(1,2), mar = c(3.5,3.5,2.0,0.5), mgp = c(2,0.65,0), cex = 1.0);}
+  hist(log10(colSums(countMatrix)),col='wheat',xlab='log10[ molecules ]',main='') 
+  # some of the cells are very large .. those can skew the analysis of more subtle populations (too much bias) .. letting them in here though
+  
+  abline(v=log10(c(min.cell.size,max.cell.size)),lty=2,col=2)
+  # look at the number of genes vs. molecule size depenency
+  df <- data.frame(molecules=colSums(countMatrix),genes=colSums(countMatrix>0)); 
+  df <- df[df$molecules>=min.cell.size,];
+  df <- log10(df);
+  df <- df[order(df$molecules,decreasing=F),]
+  plot(df,col=adjustcolor(1,alpha=alpha),cex=0.5,ylab='log10[ gene counts]',xlab='log10[ molecule counts]')
+  abline(v=log10(c(min.cell.size,max.cell.size)),lty=2,col=2)
+  #abline(lm(genes ~ molecules, data=df),col=4)
+  require(MASS)  
+  m <- rlm(genes~molecules,data=df)
+  suppressWarnings(pb <- data.frame(predict(m,interval='prediction',level = 1-p.level,type="response")))
+  polygon(c(df$molecules,rev(df$molecules)),c(pb$lwr,rev(pb$upr)),col=adjustcolor(2,alpha=0.1),border = NA)
+  outliers <- rownames(df)[df$genes > pb$upr | df$genes < pb$lwr];
+  points(df[outliers,],col=2,cex=0.6)
+  # set of filtered cells to move forward with  
+  valid.cells <- colSums(countMatrix)>min.cell.size & colSums(countMatrix)<max.cell.size & !(colnames(countMatrix) %in% outliers)
+  countMatrix[,valid.cells,drop=F]
+}
+# load 10x matrices from a named list of result folders
+t.load.10x.data <- function(matrixPaths) {
+  require(parallel)
+  require(Matrix)
+  mclapply(sn(names(matrixPaths)),function(nam) {
+    matrixPath <- matrixPaths[nam];
+    # read all count files (*_unique.counts) under a given path
+    #cat("loading data from ",matrixPath, " ");
+    x <- as(readMM(paste(matrixPath,'matrix.mtx',sep='/')),'dgCMatrix'); # convert to the required sparse matrix representation
+    cat(".")
+    gs <- read.delim(paste(matrixPath,'genes.tsv',sep='/'),header=F)
+    rownames(x) <- gs[,2]
+    cat(".")
+    gs <- read.delim(paste(matrixPath,'barcodes.tsv',sep='/'),header=F)
+    colnames(x) <- gs[,1]
+    cat(".")
+    colnames(x) <- paste(nam,colnames(x),sep='_');
+    x
+  },mc.cores=30)
+}
+```
+
+
+```{r}
+data.path <- "~/workshop_materials/transcriptomics/10x_pbmc8k"
+cd <- t.load.10x.data(list(PBMC8K=data.path))
+```
+```{r}
+str(cd)
+```
+
+```{r}
+counts <- t.filter.for.valid.cells(cd[[1]],min.cell.size=500)
+```
+
+```{r}
+r <- Pagoda2$new(counts,log.scale=FALSE)
+```
+
+```{r}
+rownames(counts) <- make.unique(rownames(counts))
+r <- Pagoda2$new(counts,log.scale=FALSE)
+```
+
+
+```{r}
+r$adjustVariance(plot=T,gam.k=10)
+```
+
+
+```{r}
+r$calculatePcaReduction(nPcs=100,n.odgenes=3e3,maxit = 200)
+```
+
+```{r}
+r$makeKnnGraph(k=40,type='PCA',center=T,distance='cosine')
+```
+
+```{r}
+r$getKnnClusters(method=multilevel.community,type='PCA')
+```
+
+```{r}
+M <- 30; r$getEmbedding(type = 'PCA',embeddingType = 'largeVis', M = M,  perplexity = 30,  gamma = 1 / M,  alpha = 1)
+```
+
+
+```{r}
+r$plotEmbedding(type='PCA',show.legend=F,mark.clusters=T,min.group.size=50,shuffle.colors=F,mark.cluster.cex=1,alpha=0.1,main='clusters (lV)')
+```
+
+```{r}
+r$getEmbedding(type='PCA',embeddingType='tSNE',perplexity=50,verbose=F,n.cores=2)
+```
+
