@@ -9,7 +9,7 @@ To check out the code/data for this tutorial, run "git clone https://github.com/
 A Fluidigm C1 dataset from (Camp et al.)[http://www.pnas.org/content/112/51/15672] has been pre-prepared for you. The data is provided as a matrix of gene counts, where each column corresponds to a cell and each row a gene.
 
 ```{r}
-data.dir <- "../../scw2016/data/"
+data.dir <- "~/workshop_materials/transcriptomics/scw/scw2016/data/"
 load(paste0(data.dir,"cd.RData"))
 dim(cd)
 cd[1:5,1:5]
@@ -94,7 +94,6 @@ library(scde)
 Each cell is modeled using a mixture of a negative binomial (NB) distribution (for the amplified/detected transcripts) and low-level Poisson distribution (for the unobserved or background-level signal of genes that failed to amplify or were not detected for other reasons). These models can then be used to identify robustly differentially expressed genes.
 
 ```{r eval=FALSE}
-# EVALUATION NOT NEEDED FOR SAKE OF TIME
 knn <- knn.error.models(cd, k = ncol(cd)/4, n.cores = 30, min.count.threshold = 2, min.nonfailed = 5, max.model.plots = 10)
 ```
 
@@ -107,7 +106,7 @@ head(knn)
 The cell specific error models are then used to quantify excess variance or overdispersion in genes and gene sets in order to cluster cells and identify subpopulations. Accurate quantification of this overdispersion means that we must normalize out expected levels of technical and intrinsic biological noise. Intuitively, lowly-expressed genes are often more prone to drop-out and thus may exhibit large variances simply due to such technical noise.
 
 ```{r}
-varinfo <- pagoda.varnorm(knn, counts = cd, trim = 3/ncol(cd), max.adj.var = 5, n.cores = 10, plot = TRUE, verbose=TRUE)
+varinfo <- pagoda.varnorm(knn, counts = cd, trim = 3/ncol(cd), max.adj.var = 5, n.cores = 2, plot = TRUE, verbose=TRUE)
 ```
 
 
@@ -163,12 +162,12 @@ length(go.env)
 
 Now, we can calculate weighted first principal component magnitudes for each GO gene set in the provided environment.
 ```{r eval=FALSE}
-pwpca <- pagoda.pathway.wPCA(varinfo, go.env, n.components = 1, n.cores = 10)
+pwpca <- pagoda.pathway.wPCA(varinfo, go.env, n.components = 1, n.cores = 2)
 ```
 
 In addition to relying on pre-defined pathways, we can also test on ‘de novo’ gene sets whose expression profiles are well-correlated within the given dataset.
 ```{r eval=FALSE}
-clpca <- pagoda.gene.clusters(varinfo, trim = 7.1/ncol(varinfo$mat), n.clusters = 150, n.cores = 10, plot = FALSE)
+clpca <- pagoda.gene.clusters(varinfo, trim = 7.1/ncol(varinfo$mat), n.clusters = 150, n.cores = 2, plot = FALSE)
 ```
 
 But we'll use pre-calculated results, without de novo gene sets:
@@ -289,7 +288,7 @@ Now, let’s use scde to identify differentially expressed genes.
 ```{r}
 # run differential expression tests on a subset of genes (to save time)
 vi <- c("BCL11B", "CDH6", "CNTNAP2", "GRIK3", "NEUROD6", "RTN1", "RUNX1T1", "SERINC5", "SLC24A2", "STMN2", "AIF1L", "ANP32E", "ARID3C", "ASPM", "ATP1A2", "AURKB", "AXL", "BCAN", "BDH2", "C12orf48")
-ediff <- scde.expression.difference(knn, cd[vi,], prior=varinfo$prior, groups = test, n.cores = 1, verbose = 1)
+ediff <- scde.expression.difference(knn, cd[vi,], prior=varinfo$prior, groups = test, n.cores = 2, verbose = 1)
 ```
 
 Look at the top genes:

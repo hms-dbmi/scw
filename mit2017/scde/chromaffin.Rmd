@@ -12,14 +12,16 @@ We generally start with count matrices. These are obtained from alignment result
 
 
 ```{r}
-counts.dir <- "../data/counts"
+data.path <- '~/workshop_materials/transcriptomics/chromaffin';
+counts.dir <- paste(data.path,'counts',sep='/')
 str(list.files(path=counts.dir))
 ```
 
 We'll define a quick function to read them in in parallel:
 ```{r}
 t.read.in.counts <- function(path,n.cores) {
-  fs <- list.files(path=path,pattern=".*_unique.counts$",recursive=T)
+  require(parallel)
+  fs <- list.files(path=path,pattern=".*_unique.counts$",recursive=T)[1:6]
   names(fs) <- gsub("_unique.counts","",fs)
   names(fs) <- gsub(".+?/","",names(fs))
   dat <- do.call(cbind,mclapply(fs,function(file) { df <- read.delim(paste(path,file,sep="/"),header=F,stringsAsFactors=F,skip=2); x <- df[,7]; names(x) <- df[,1]; x;},mc.cores=n.cores))
@@ -29,14 +31,12 @@ t.read.in.counts <- function(path,n.cores) {
 ```
 
 ```{r}
-data.path <- '../data';
-counts.dir <- paste(data.path,'counts',sep='/')
-dat <- t.read.in.counts(counts.dir,10)
+dat <- t.read.in.counts(counts.dir,2)
+str(dat)
 ```
 
 ```{r}
-
-colnames(dat) <- gsub("../data/counts.","",colnames(dat))
+colnames(dat) <- gsub("~/workshop_materials/transcriptomics/chromaffin/counts.","",colnames(dat))
 str(dat)
 rm(dat);
 ```
@@ -55,12 +55,13 @@ res <- c(res,t.postprocess(res,name="E12_5_c",port = NULL,perplexity = 10,includ
 
 But let's read in results of the processing:
 ```{r}
+suppressMessages(require(scde))
 res <- readRDS(paste(data.path,"processed.rds",sep='/'))
 names(res)
 ```
 
 ```{r}
-show.app(res$app,name='chromaffin',browse=T)
+show.app(res$app,name='chromaffin',browse=F)
 ```
 
 Let's recapitulate the t-SNE embedding plot:
@@ -83,7 +84,7 @@ fpm <- log10(t(t(res$cd)/lib.size)+1)
 
 Run PCA:
 ```{r}
-require(pcaMethods)
+suppressMessages(require(pcaMethods))
 base.pca <- pca(t(fpm),nPcs = 2)
 ```
 
@@ -116,7 +117,8 @@ plot(scores(od.pca),col=1,bg=adjustcolor(res$cols,alpha=0.6),cex=2,pch=21,panel.
 
 By default, tSNE will measure cell similarity using Euclidean distance in PCA space:
 ```{r}
-tsne <- Rtsne(t(fpm[od.genes,]), perplexity=50, verbose = FALSE, num_threads=10) 
+suppressMessages(require(Rtsne))
+tsne <- Rtsne(t(fpm[od.genes,]), perplexity=50, verbose = FALSE, num_threads=2) 
 ```
 
 ```{r}
@@ -130,7 +132,7 @@ d <- as.dist(1-cor(fpm[od.genes,]))
 ```
 
 ```{r}
-tsne2 <- Rtsne(d, is_distance = TRUE, perplexity=50, verbose = F, num_threads=10) 
+tsne2 <- Rtsne(d, is_distance = TRUE, perplexity=50, verbose = F, num_threads=2) 
 ```
 
 ```{r}
@@ -140,7 +142,7 @@ plot(tsne2$Y,col=1,bg=adjustcolor(res$cols,alpha=0.6),cex=2,pch=21,panel.first=g
 
 We can see what increasing or decreasing perplexity does:
 ```{r}
-tsne3 <- Rtsne(d, is_distance = TRUE, perplexity=3, verbose = F, num_threads=10) 
+tsne3 <- Rtsne(d, is_distance = TRUE, perplexity=3, verbose = F, num_threads=2) 
 ```
 
 ```{r}
@@ -169,26 +171,33 @@ Monocle aims to reconstruct a tree and determine embedding that best represents 
 First we have to represent a dataset in a different way:
 ```{r}
 require("monocle")
+fpm <- res$cd[,colnames(res$mat)];
 pd <- as.data.frame(cbind(res$cols ));
 rownames(pd) <- colnames(fpm); colnames(pd) <- c("color")
 pd = new("AnnotatedDataFrame", data = pd )
 
-fd <- as.data.frame(ifelse(rownames(fpm) %in% od.genes,1,0));
-rownames(fd) <- rownames(fpm); colnames(fd) <- c("od")
+fd <- data.frame(ifelse(rownames(fpm) %in% od.genes,1,0),rownames(fpm));
+rownames(fd) <- rownames(fpm); colnames(fd) <- c("od","gene_short_name")
 fd = new("AnnotatedDataFrame", data = fd)
 
 fpm1 <- newCellDataSet(fpm, phenoData = pd, featureData = fd)
 ```
 
 ```{r}
-fpm1 = setOrderingFilter(fpm1,od.genes)
-mncl = reduceDimension(fpm1, max_components=2)
-mncl = orderCells(mncl)
+fpm1 <- estimateSizeFactors(fpm1)
+fpm1 <- estimateDispersions(fpm1)
+fpm1 <- setOrderingFilter(fpm1,od.genes)
+mncl <- reduceDimension(fpm1)
+suppressWarnings(mncl <- orderCells(mncl))
 ```
 
-
+Visualize the resulting tree
 ```{r}
 plot_cell_trajectory(mncl)
+```
+
+Check correspondence with pre-defined clusters:
+```{r}
 plot(mncl@reducedDimS[1,],mncl@reducedDimS[2,],col=as.character(mncl@phenoData@data$col))
 ```
 
