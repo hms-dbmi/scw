@@ -253,11 +253,23 @@ r$getHierarchicalDiffExpressionAspects(type='PCA',clusterName='community',z.thre
 
 We'll make an app with that, ordering the "differential expression aspects" explicitly (otherwise if row clustering is omitted they'll be clustered by similarity)
 ```{r}
-app <- p2.make.pagoda1.app(r,inner.clustering=TRUE,embeddingType='tSNE',clusterType='community',min.group.size=50,row.clustering=list(order=rev(1:nrow(r$misc$pathwayOD$xv))))
+app <- p2.make.pagoda1.app(r,inner.clustering=TRUE,embeddingType='tSNE',clusterType='infomap',min.group.size=50,row.clustering=list(order=rev(1:nrow(r$misc$pathwayOD$xv))))
 ```
 
 Show app:
 ```{r eval=F}
 show.app(app,'pbmc',browse=T)
+```
+
+Destiny-bsaed embedding:
+
+```{r}
+require(destiny)
+# variance-scaled matrix
+x <- r$counts;
+x@x <- x@x*rep(r$misc[['varinfo']][colnames(x),'gsf'],diff(x@p))
+
+dm <- DiffusionMap(as.matrix(x), verbose = TRUE,k=30,n.eigs=50)
+
 ```
 
